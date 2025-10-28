@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat UI</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="script.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://kit.fontawesome.com/dda2710b56.js" crossorigin="anonymous"></script>
+</head>
+
+<body class="auth-visible">
+
+    <div id="auth-overlay">
+        <div id="auth-container">
+            <!-- Login Form -->
+            <form id="login-form">
+                <h2>Login</h2>
+                <div class="auth-form-group">
+                    <label for="login-email">Email</label>
+                    <input type="email" id="login-email" class="auth-input" required>
+                </div>
+                <div class="auth-form-group password-group">
+                    <label for="login-password">Password</label>
+                    <input type="password" id="login-password" class="auth-input" required>
+                    <button type="button" class="password-toggle-btn" id="toggle-login-password"><i
+                            class="fa-solid fa-eye"></i></button>
+                </div>
+                <button type="submit" class="auth-button">Login</button>
+                <p class="auth-error" id="login-error"></p>
+                <p class="auth-toggle">
+                    Don't have an account? <button type="button" id="show-signup-btn" class="auth-toggle-btn">Sign
+                        Up</button>
+                </p>
+            </form>
+
+            <!-- Signup Form (hidden by default) -->
+            <form id="signup-form" style="display: none;">
+                <h2>Sign Up</h2>
+                <div class="auth-form-group">
+                    <label for="signup-email">Email</label>
+                    <input type="email" id="signup-email" class="auth-input" required>
+                </div>
+                <div class="auth-form-group password-group">
+                    <label for="signup-password">Password (min. 6 characters)</label>
+                    <input type="password" id="signup-password" class="auth-input" required>
+                    <button type="button" class="password-toggle-btn" id="toggle-signup-password"><i
+                            class="fa-solid fa-eye"></i></button>
+                </div>
+                <button type="submit" class="auth-button">Sign Up</button>
+                <p class="auth-error" id="signup-error"></p>
+                <p class="auth-toggle">
+                    Already have an account? <button type="button" id="show-login-btn"
+                        class="auth-toggle-btn">Login</button>
+                </p>
+            </form>
+        </div>
+    </div>
+    <!-- --- END: Auth Overlay --- -->
+
+    <main class="chat-app">
+        <nav class="icon-nav">
+            <ul>
+                <li><button title="Menu">☰</button></li>
+                <li><button title="Profile">👤</button></li>
+                <li><button title="Messages">✉️</button></li>
+                <li><button title="Settings">⚙️</button></li>
+                <li><button title="Edit">✏️</button></li>
+            </ul>
+        </nav>
+
+        <aside class="contacts-panel">
+            <header>
+                <h2>Chats</h2>
+                <span>★</span>
+            </header>
+
+            <div id="user-info">
+                <p>You are logged in as:</p>
+                <strong id="user-email-display">...loading...</strong>
+            </div>
+
+            <button title="New Chat" id="new-chat-btn" class="contacts-header-btn">
+                <i class="fas fa-plus"></i>
+            </button>
+
+            <ul class="contacts-list">
+                <li class="active">
+                    <figure class="avatar"></figure>
+                    <div class="contact-info">
+                        <strong>John Doe</strong>
+                    </div>
+                    <time>Today</time>
+                </li>
+                <li>
+                    <figure class="avatar"></figure>
+                    <div class="contact-info">
+                        <strong>Alice Wen</strong>
+                    </div>
+                    <time>Today</time>
+                </li>
+                <li>
+                    <figure class="avatar"></figure>
+                    <div class="contact-info">
+                        <strong>Jacob Will</strong>
+                    </div>
+                    <time>Today</time>
+                </li>
+                <li>
+                    <figure class="avatar"></figure>
+                    <div class="contact-info">
+                        <strong>Sarah Kim</strong>
+                    </div>
+                    <time>Yesterday</time>
+                </li>
+                <li>
+                    <figure class="avatar"></figure>
+                    <div class="contact-info">
+                        <strong>Mike Ross</strong>
+                    </div>
+                    <time>Yesterday</time>
+                </li>
+                <li>
+                    <figure class="avatar"></figure>
+                    <div class="contact-info">
+                        <strong>Eva Williams</strong>
+                    </div>
+                    <time>10/25</time>
+                </li>
+            </ul>
+        </aside>
+
+        <section class="chat-panel">
+            <header>
+                <figure class="avatar"></figure>
+                <strong>John Doe</strong>
+                <div class="chat-controls">
+                    <span class="search-icon">🔍</span>
+                    <div class="dropdown-container">
+                        <button class="dropdown-toggle" title="More options">⋮</button>
+                        <div class="dropdown-menu">
+                            <ul>
+                                <li><button class="dropdown-item">Clear chat</button></li>
+                                <li><button class="dropdown-item">Export chat</button></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </header>
+            <div class="messages-area">
+                <div class="message received">
+                    <p>Hi...</p>
+                </div>
+                <div class="message received">
+                    <p>How are you?</p>
+                </div>
+                <div class="message sent">
+                    <p>I am fine...</p>
+                </div>
+                <div class="message sent">
+                    <p>What about you?</p>
+                </div>
+            </div>
+            <footer>
+                <button title="Send">➤</button>
+                <input type="text" placeholder="message...">
+            </footer>
+        </section>
+
+    </main>
+
+    <!-- --- START: New Chat Modal --- -->
+    <div id="new-chat-modal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Start a New Chat</h3>
+                <button id="close-modal-btn" class="modal-close-btn">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <form id="new-chat-form">
+                <p class="modal-intro">Enter the email address of the user you want to chat with.</p>
+
+                <div class="form-group">
+                    <label for="new-chat-email">User's Email</label>
+                    <input type="email" id="new-chat-email" class="modal-input" required>
+                </div>
+
+                <p id="new-chat-error" class="modal-error"></p>
+
+                <div class="modal-actions">
+                    <button type="button" id="cancel-new-chat-btn" class="modal-btn secondary">Cancel</button>
+                    <button type="submit" class="modal-btn primary">Start Chat</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <!-- --- END: New Chat Modal --- -->
+
+    <script src="config.js"></script>
+    <script type="module">
+        // --- STEP 1: INITIALIZE SUPABASE ---
+
+        const { createClient } = supabase;
+        const db = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        console.log('Supabase is connected!', db);
+
+        // --- STEP 2: GET DOM ELEMENTS ---
+        // We need to get all the HTML elements we just created
+        const authOverlay = document.getElementById('auth-overlay');
+        const loginForm = document.getElementById('login-form');
+        const signupForm = document.getElementById('signup-form');
+        const showSignupBtn = document.getElementById('show-signup-btn');
+        const showLoginBtn = document.getElementById('show-login-btn');
+        const loginError = document.getElementById('login-error');
+        const signupError = document.getElementById('signup-error');
+        const chatApp = document.querySelector('.chat-app'); // Get the main app container
+        const loginPasswordInput = document.getElementById('login-password');
+        const signupPasswordInput = document.getElementById('signup-password');
+        const toggleLoginPasswordBtn = document.getElementById('toggle-login-password');
+        const toggleSignupPasswordBtn = document.getElementById('toggle-signup-password');
+        const userEmailDisplay = document.getElementById('user-email-display');
+        const newChatBtn = document.getElementById('new-chat-btn');
+        const newChatModal = document.getElementById('new-chat-modal');
+        const closeModalBtn = document.getElementById('close-modal-btn');
+        const cancelNewChatBtn = document.getElementById('cancel-new-chat-btn');
+        const newChatForm = document.getElementById('new-chat-form');
+        const newChatError = document.getElementById('new-chat-error');
+
+        // --- STEP 3: HANDLE AUTH LOGIC ---
+
+        // Toggle between login and signup forms
+        showSignupBtn.addEventListener('click', () => {
+            loginForm.style.display = 'none';
+            signupForm.style.display = 'block';
+        });
+
+        showLoginBtn.addEventListener('click', () => {
+            loginForm.style.display = 'block';
+            signupForm.style.display = 'none';
+        });
+
+        const togglePassword = (input, button) => {
+            if (input.type === 'password') {
+                input.type = 'text';
+                button.textContent = '🙈'; // "See-no-evil" monkey for "hide"
+            } else {
+                input.type = 'password';
+                button.textContent = '👁️'; // "Eye" for "show"
+            }
+        };
+
+        // Add click listeners for both password toggle buttons
+        toggleLoginPasswordBtn.addEventListener('click', () => {
+            togglePassword(loginPasswordInput, toggleLoginPasswordBtn);
+        });
+
+        toggleSignupPasswordBtn.addEventListener('click', () => {
+            togglePassword(signupPasswordInput, toggleSignupPasswordBtn);
+        });
+
+        // Handle Sign Up
+        signupForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('signup-email').value;
+            const password = document.getElementById('signup-password').value;
+
+            // 1. Sign up the user in Supabase Auth
+            const { data: authData, error: authError } = await db.auth.signUp({ email, password });
+
+            if (authError) {
+                signupError.textContent = authError.message;
+                signupError.style.display = 'block';
+                console.error('Signup Error:', authError.message);
+                return;
+            }
+
+            // 2. ALSO add them to your public 'profiles' table
+            const { error: profileError } = await db.from('profiles').insert({
+                id: authData.user.id,
+                email: email
+            });
+
+            if (profileError) {
+                signupError.textContent = 'Failed to create profile: ' + profileError.message;
+                signupError.style.display = 'block';
+                console.error('Profile Error:', profileError.message);
+            } else {
+                console.log('User signed up and profile created!');
+                // Log them in immediately (Supabase often does this, but good to be sure)
+                // The onAuthStateChange listener will handle hiding the overlay.
+            }
+        });
+
+        // Handle Login
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+
+            const { data, error } = await db.auth.signInWithPassword({ email, password });
+
+            if (error) {
+                loginError.textContent = error.message;
+                loginError.style.display = 'block';
+                console.error('Login Error:', error.message);
+            } else {
+                console.log('User logged in:', data.user.email);
+                // The onAuthStateChange listener (below) will hide the overlay
+            }
+        });
+
+        // Helper function to open the modal
+        function openNewChatModal() {
+            newChatModal.classList.add('show');
+            // Clear any previous errors
+            newChatError.textContent = '';
+            newChatError.style.display = 'none';
+            // Reset the form
+            newChatForm.reset();
+        }
+
+        // Helper function to close the modal
+        function closeNewChatModal() {
+            newChatModal.classList.remove('show');
+        }
+
+        // 1. Open the modal when the '+' button is clicked
+        newChatBtn.addEventListener('click', () => {
+            openNewChatModal();
+        });
+
+        // 2. Close the modal with the 'X' button
+        closeModalBtn.addEventListener('click', () => {
+            closeNewChatModal();
+        });
+
+        // 3. Close the modal with the 'Cancel' button
+        cancelNewChatBtn.addEventListener('click', () => {
+            closeNewChatModal();
+        });
+
+        // 4. Handle the form submission
+        newChatForm.addEventListener('submit', async (e) => {
+            e.preventDefault(); // Stop the form from reloading the page
+
+            // --- This is where we will add the database logic NEXT ---
+            console.log('Form submitted!');
+
+            // For now, just close the modal
+            closeNewChatModal();
+        });
+
+        // --- END: NEW CHAT MODAL LOGIC ---
+
+        // --- STEP 4: MANAGE SESSION ---
+        // This is the MOST important part. It runs when the page loads
+        // and checks if the user is already logged in.
+
+        db.auth.onAuthStateChange((event, session) => {
+            if (session) {
+                // User is LOGGED IN
+                console.log('Auth state changed: User is IN', session.user.email);
+                // Hide the login overlay
+                authOverlay.classList.add('hidden');
+                document.body.classList.remove('auth-visible');
+                // Show the main chat app (we'll un-hide it, just in case)
+                chatApp.classList.remove('hidden');
+                userEmailDisplay.textContent = session.user.email;
+                // ----> This is where we will load the user's chats next <----
+                // loadUserChats(session.user.id); 
+
+            } else {
+                // User is LOGGED OUT
+                console.log('Auth state changed: User is OUT');
+                // Show the login overlay
+                authOverlay.classList.remove('hidden');
+                document.body.classList.add('auth-visible');
+                // Hide the main chat app
+                chatApp.classList.add('hidden');
+            }
+        });
+
+    </script>
+</body>
+
+</html>

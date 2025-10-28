@@ -1,0 +1,676 @@
+:root {
+    --primary-color: #c000c0;
+    --bg-dark: #140014;
+    --bg-medium: #1e001e;
+    --bg-pattern: #300030;
+    --bubble-sent: #520052;
+    --bubble-received: #7b2a7b;
+    --text-light: #ffffff;
+    --text-muted: #aaaaaa;
+    --border-color: #300030;
+    --success-color: #00c000; /* Add this if not present */
+    --error-color: #c00000;   /* Add this if not present */
+
+    /* New colors for the background gradient and glow */
+    --gradient-start: #0a000a; /* Darker purple */
+    --gradient-end: #2a002a;   /* Slightly lighter purple */
+    --glow-color: #d000d0;     /* Brighter purple for glow */
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html,
+body {
+    height: 100%;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background-color: var(--bg-dark);
+    color: var(--text-light);
+    font-size: 16px;
+    overflow: hidden;
+}
+
+/* --- Auth Overlay Styles --- */
+#auth-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    /* Keep existing background and blur, or change as desired */
+    background: rgba(0, 0, 0, 0.7); /* Slightly transparent dark overlay */
+    backdrop-filter: blur(8px); /* Less blur, or adjust as you like */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 100;
+    transition: opacity 0.3s ease;
+}
+
+#auth-container {
+    background-color: var(--bg-medium);
+    padding: 2.5rem;
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+    width: 100%;
+    max-width: 400px;
+    box-shadow: 
+        0 4px 15px rgba(0, 0, 0, 0.4), /* Deeper shadow for depth */
+        0 0 30px var(--glow-color);    /* The glow effect */
+    transition: all 0.3s ease; /* Smooth transition for hover effects */
+}
+
+#auth-container h2 {
+    text-align: center;
+    color: var(--glow-color); /* Use the brighter glow color for the heading */
+    margin-bottom: 1.5rem;
+    font-size: 1.75rem;
+    text-shadow: 0 0 10px var(--primary-color); /* Subtle text glow */
+}
+
+#auth-container:hover {
+    box-shadow: 
+        0 6px 20px rgba(0, 0, 0, 0.5),
+        0 0 40px var(--glow-color); /* Stronger glow on hover */
+}
+
+.auth-form-group {
+    margin-bottom: 1.25rem;
+}
+
+.auth-form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: var(--text-muted);
+    font-weight: 500;
+}
+
+.auth-input {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    background-color: var(--bg-dark);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    color: var(--text-light);
+    font-size: 1rem;
+    transition: border-color 0.2s, box-shadow 0.2s; /* Add shadow transition */
+}
+
+.auth-input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 15px var(--primary-color), /* Primary glow on focus */
+                inset 0 0 5px var(--primary-color); /* Inner glow */
+}
+
+.auth-button {
+    width: 100%;
+    padding: 0.85rem;
+    border: none;
+    border-radius: 8px;
+    background-color: var(--primary-color);
+    color: var(--text-light);
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s, box-shadow 0.2s;
+    box-shadow: 0 0 10px rgba(192, 0, 192, 0.5); /* Initial button glow */
+}
+
+.auth-button:hover {
+    background-color: #a000a0; /* Slightly darker purple on hover */
+    box-shadow: 0 0 20px rgba(192, 0, 192, 0.8), /* Stronger glow on hover */
+                0 0 5px rgba(255, 255, 255, 0.3) inset; /* Subtle inner highlight */
+}
+
+.auth-toggle {
+    text-align: center;
+    margin-top: 1rem;
+    font-size: 0.9rem;
+}
+
+.auth-toggle-btn {
+    background: none;
+    border: none;
+    color: var(--glow-color); /* Use glow color for toggle link */
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.9rem;
+    transition: text-shadow 0.2s;
+}
+
+.auth-toggle-btn:hover {
+    text-shadow: 0 0 8px var(--glow-color); /* Glow on toggle link hover */
+}
+
+.auth-error {
+    color: #c00000; /* Error red */
+    text-align: center;
+    margin-top: 1rem;
+    font-size: 0.9rem;
+    display: none; /* Hidden by default */
+}
+
+/* --- Helper classes --- */
+.hidden {
+    display: none !important;
+}
+
+/* Password Field Styles */
+
+/* --- Add these new styles for the password toggle --- */
+
+.password-group {
+    position: relative; /* This is the anchor for the absolute button */
+}
+
+.password-group .auth-input {
+    /* Add padding to the right to make space for the button */
+    padding-right: 45px; 
+}
+
+.password-toggle-btn {
+    position: absolute;
+    /* This positions the button vertically centered with the input */
+    top: 45px; /* Adjust this number if it's not centered */
+    transform: translateY(-50%);
+    right: 10px;
+    
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    font-size: 1.25rem; /* Makes the 👁️ icon a good size */
+    padding: 0 5px;
+    z-index: 10; /* Ensures it's on top of the input */
+}
+
+.password-toggle-btn:hover {
+    color: var(--text-light);
+}
+
+.chat-app {
+    display: flex;
+    height: 100vh;
+    width: 100%;
+    transition: filter 0.3s ease; /* Smooth transition when auth overlay hides/shows */
+}
+
+body.auth-visible .chat-app {
+    filter: blur(5px); /* Apply blur */
+    pointer-events: none; /* Prevent interaction with blurred app */
+}
+
+/* This hides the auth overlay completely when not needed */
+#auth-overlay.hidden {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none; /* Crucial to allow clicks through when hidden */
+}
+
+.icon-nav {
+    width: 60px;
+    background-color: var(--bg-dark);
+    padding: 1rem 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+.icon-nav ul {
+    list-style: none;
+}
+
+.icon-nav li {
+    margin-bottom: 2rem;
+}
+
+.icon-nav button {
+    background: none;
+    border: none;
+    color: var(--text-light);
+    font-size: 1.5rem;
+    cursor: pointer;
+    opacity: 0.7;
+    transition: opacity 0.2s;
+}
+
+.icon-nav button:hover {
+    opacity: 1;
+}
+
+.contacts-panel {
+    width: 300px;
+    background-color: var(--bg-dark);
+    border-right: 1px solid var(--border-color);
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+}
+
+.contacts-panel header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    background-color: var(--primary-color);
+    flex-shrink: 0;
+}
+
+.contacts-panel h2 {
+    font-size: 1.25rem;
+    font-weight: 600;
+}
+
+.contacts-panel header span {
+    font-size: 1.25rem;
+    cursor: pointer;
+}
+
+.contacts-list {
+    list-style: none;
+    overflow-y: auto;
+    flex-grow: 1;
+}
+
+.contacts-list li {
+    display: flex;
+    align-items: center;
+    padding: 1rem;
+    border-bottom: 1px solid var(--border-color);
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.contacts-list li.active {
+    border-left: 4px solid var(--text-light);
+    background-color: #2a002a;
+}
+
+.contacts-list li:hover:not(.active) {
+    background-color: #2a002a;
+}
+
+.avatar {
+    width: 44px;
+    height: 44px;
+    background-color: var(--primary-color);
+    border-radius: 50%;
+    margin-right: 0.75rem;
+    flex-shrink: 0;
+}
+
+.contact-info {
+    flex-grow: 1;
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+.contact-info strong {
+    display: block;
+    font-weight: 600;
+}
+
+.contacts-list time {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    flex-shrink: 0;
+    margin-left: 0.5rem;
+}
+
+.chat-panel {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    background-color: var(--bg-medium);
+}
+
+.chat-panel header {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem 1rem;
+    background-color: var(--primary-color);
+    flex-shrink: 0;
+}
+
+.chat-panel header strong {
+    margin-left: 0.75rem;
+    flex-grow: 1;
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+.chat-controls {
+    display: flex;
+    align-items: center;
+}
+
+.chat-controls .search-icon {
+    margin-left: 1.25rem;
+    font-size: 1.25rem;
+    cursor: pointer;
+    opacity: 0.9;
+}
+
+.dropdown-container {
+    position: relative;
+    display: inline-block;
+}
+
+.dropdown-toggle {
+    background: none;
+    border: none;
+    color: var(--text-light);
+    font-size: 1.25rem;
+    cursor: pointer;
+    opacity: 0.9;
+    margin-left: 1.25rem;
+    padding: 0;
+    line-height: 1;
+}
+
+.dropdown-menu {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background-color: var(--bg-dark);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    min-width: 150px;
+    padding: 0.5rem 0;
+    z-index: 10;
+
+    /* Styles for smooth transition */
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px) scale(0.95);
+    transform-origin: top right;
+    transition: opacity 0.2s ease, visibility 0.2s ease, transform 0.2s ease;
+}
+
+.dropdown-menu.show {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0) scale(1);
+}
+
+.dropdown-menu ul {
+    list-style: none;
+}
+
+.dropdown-menu .dropdown-item {
+    display: block;
+    width: 100%;
+    text-align: left;
+    background: none;
+    border: none;
+    color: var(--text-light);
+    padding: 0.75rem 1rem;
+    font-size: 0.95rem;
+    cursor: pointer;
+}
+
+.dropdown-menu .dropdown-item:hover {
+    background-color: var(--bg-medium);
+}
+
+.messages-area {
+    flex-grow: 1;
+    padding: 1rem;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    background-image: radial-gradient(var(--bg-pattern) 1px, transparent 1px);
+    background-size: 20px 20px;
+}
+
+.message {
+    max-width: 60%;
+    width: fit-content;
+}
+
+.message p {
+    padding: 0.75rem 1rem;
+    border-radius: 18px;
+    line-height: 1.4;
+}
+
+.message.received {
+    align-self: flex-start;
+}
+
+.message.received p {
+    background-color: var(--bubble-received);
+    border-bottom-left-radius: 4px;
+}
+
+.message.sent {
+    align-self: flex-end;
+}
+
+.message.sent p {
+    background-color: var(--bubble-sent);
+    border-bottom-right-radius: 4px;
+}
+
+.chat-panel footer {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem 1rem;
+    background-color: var(--primary-color);
+    flex-shrink: 0;
+}
+
+.chat-panel footer button {
+    background: none;
+    border: none;
+    color: var(--text-light);
+    font-size: 1.5rem;
+    margin-right: 0.75rem;
+    cursor: pointer;
+    transform: rotate(-90deg);
+}
+
+.chat-panel footer input {
+    flex-grow: 1;
+    background-color: var(--bg-dark);
+    border: none;
+    padding: 0.75rem 1rem;
+    border-radius: 20px;
+    color: var(--text-light);
+    font-size: 1rem;
+}
+
+.chat-panel footer input::placeholder {
+    color: var(--text-muted);
+}
+
+/* New User Info */
+
+#user-info {
+    padding: 1rem;
+    background-color: var(--bg-medium);
+    border-bottom: 1px solid var(--border-color);
+}
+#user-info p {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin-bottom: 0.25rem;
+}
+#user-info strong {
+    color: var(--text-light);
+    font-weight: 600;
+    font-size: 0.9rem;
+    word-break: break-all; /* This helps if the email is very long */
+}
+
+/* --- Style for the new '+' button in the contacts header --- */
+.contacts-header-btn {
+    background: none;
+    border: none;
+    color: var(--text-light);
+    font-size: 1.25rem; /* Make the icon a good size */
+    cursor: pointer;
+    opacity: 0.8;
+    transition: opacity 0.2s;
+    padding: 0.25rem; /* Add some clickable area */
+}
+.contacts-header-btn:hover {
+    opacity: 1;
+}
+
+
+/* --- New Chat Modal Styles --- */
+
+/* This is the full-screen overlay, hidden by default */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(8px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 200; /* High z-index to be on top */
+    
+    /* --- Hide it by default --- */
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+/* We will add this 'show' class with JavaScript to display the modal */
+.modal-overlay.show {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: all;
+}
+
+/* This is the white content box in the middle */
+.modal-content {
+    background-color: var(--bg-medium);
+    padding: 2rem;
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+    width: 100%;
+    max-width: 450px; /* A good width for this modal */
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    
+    /* A subtle "pop-in" animation */
+    transform: scale(0.95);
+    transition: transform 0.3s ease;
+}
+.modal-overlay.show .modal-content {
+    transform: scale(1);
+}
+
+/* Modal Header: Title and Close Button */
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+.modal-header h3 {
+    color: var(--primary-color);
+    font-size: 1.5rem;
+}
+.modal-close-btn {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-size: 1.25rem;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+.modal-close-btn:hover {
+    color: var(--text-light);
+}
+
+/* Modal Body */
+.modal-intro {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    margin-bottom: 1.5rem;
+    line-height: 1.5;
+}
+
+/* We can reuse the auth styles, but let's make specific ones */
+/* to be safe and self-contained. */
+.form-group {
+    margin-bottom: 1.25rem;
+}
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: var(--text-muted);
+    font-weight: 500;
+}
+.modal-input {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    background-color: var(--bg-dark);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    color: var(--text-light);
+    font-size: 1rem;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+.modal-input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 10px var(--primary-color);
+}
+
+/* Modal Error Message */
+.modal-error {
+    color: var(--error-color); /* We defined this in auth styles */
+    font-size: 0.9rem;
+    margin-top: -0.5rem;
+    margin-bottom: 1.25rem;
+    display: none; /* Hidden by default */
+}
+
+/* Modal Footer Buttons */
+.modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem; /* Space between buttons */
+    margin-top: 2rem;
+}
+.modal-btn {
+    padding: 0.65rem 1.25rem;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.modal-btn.primary {
+    background-color: var(--primary-color);
+    color: var(--text-light);
+}
+.modal-btn.primary:hover {
+    background-color: #a000a0; /* Darker purple */
+    box-shadow: 0 0 10px var(--primary-color);
+}
+.modal-btn.secondary {
+    background-color: transparent;
+    color: var(--text-muted);
+    border: 1px solid var(--border-color);
+}
+.modal-btn.secondary:hover {
+    background-color: var(--border-color);
+    color: var(--text-light);
+}
