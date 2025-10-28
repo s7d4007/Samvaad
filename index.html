@@ -63,11 +63,14 @@
     <main class="chat-app">
         <nav class="icon-nav">
             <ul>
-                <li><button title="Menu">☰</button></li>
-                <li><button title="Profile">👤</button></li>
-                <li><button title="Messages">✉️</button></li>
-                <li><button title="Settings">⚙️</button></li>
-                <li><button title="Edit">✏️</button></li>
+                <li><button title="Menu"><i class="fa-solid fa-bars"></i></button></li>
+                <li><button title="Profile"><i class="fa-regular fa-user"></i></button></li>
+                <li><button title="Messages"><i class="fa-regular fa-message"></i></button></li>
+                <li><button title="Settings"><i class="fa-solid fa-gear"></i></button></li>
+                <li><button title="Edit"><i class="fa-regular fa-pen-to-square"></i></button></li>
+                <li><button title="Sign Out" id="sign-out-btn"><i
+                            class="fa-solid fa-arrow-right-from-bracket"></i></button>
+                </li>
             </ul>
         </nav>
 
@@ -199,14 +202,34 @@
     </div>
     <!-- --- END: New Chat Modal --- -->
 
+    <!-- --- START: Confirm Logout Modal --- -->
+    <div id="confirm-logout-modal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Confirm Sign Out</h3>
+                <button id="close-logout-modal-btn" class="modal-close-btn">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <p class="modal-intro">Are you sure you want to sign out?</p>
+            <div class="modal-actions">
+                <button type="button" id="cancel-logout-btn" class="modal-btn secondary">Cancel</button>
+                <button type="button" id="confirm-logout-btn" class="modal-btn primary-danger">
+                    <i class="fas fa-sign-out-alt"></i> Yes, Sign Out
+                </button>
+            </div>
+        </div>
+    </div>
+
     <script src="config.js"></script>
     <script type="module">
         // --- STEP 1: INITIALIZE SUPABASE ---
 
         const { createClient } = supabase;
         const db = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
         console.log('Supabase is connected!', db);
+
+        let currentUserId = null;
 
         // --- STEP 2: GET DOM ELEMENTS ---
         // We need to get all the HTML elements we just created
@@ -229,6 +252,11 @@
         const cancelNewChatBtn = document.getElementById('cancel-new-chat-btn');
         const newChatForm = document.getElementById('new-chat-form');
         const newChatError = document.getElementById('new-chat-error');
+        const signOutBtn = document.getElementById('sign-out-btn');
+        const confirmLogoutModal = document.getElementById('confirm-logout-modal');
+        const closeLogoutModalBtn = document.getElementById('close-logout-modal-btn');
+        const cancelLogoutBtn = document.getElementById('cancel-logout-btn');
+        const confirmLogoutBtn = document.getElementById('confirm-logout-btn');
 
         // --- STEP 3: HANDLE AUTH LOGIC ---
 
@@ -260,6 +288,13 @@
 
         toggleSignupPasswordBtn.addEventListener('click', () => {
             togglePassword(signupPasswordInput, toggleSignupPasswordBtn);
+        });
+
+        // Handle Sign Out
+        // Handle Sign Out
+        signOutBtn.addEventListener('click', () => {
+            // Now, instead of logging out, just open the modal
+            openLogoutModal();
         });
 
         // Handle Sign Up
@@ -344,21 +379,85 @@
         });
 
         // 4. Handle the form submission
+        // 4. Handle the form submission
         newChatForm.addEventListener('submit', async (e) => {
             e.preventDefault(); // Stop the form from reloading the page
 
-            // --- This is where we will add the database logic NEXT ---
-            console.log('Form submitted!');
+            // --- START: New logic ---
+            const emailToChat = document.getElementById('new-chat-email').value;
+            const loggedInUserEmail = userEmailDisplay.textContent; // We get your email from the display
 
-            // For now, just close the modal
-            closeNewChatModal();
+            // Clear any previous errors
+            newChatError.textContent = '';
+            newChatError.style.display = 'none';
+
+            // Check 1: Is the user trying to chat with themselves?
+            if (emailToChat === loggedInUserEmail) {
+                newChatError.textContent = "For now, you can't start a chat with yourself.";
+                newChatError.style.display = 'block';
+                return; // Stop the function
+            }
+
+            // Check 2: Did the user type anything?
+            if (!emailToChat) {
+                newChatError.textContent = "Please enter an email address.";
+                newChatError.style.display = 'block';
+                return; // Stop the function
+            }
+
+            console.log(`Trying to find user: ${emailToChat}`);
+
+            // --- This is where we will add Part 3 (database query) ---
+
+            // For now, let's just log it and not close the modal
+            // closeNewChatModal();
+            // --- END: New logic ---
         });
 
         // --- END: NEW CHAT MODAL LOGIC ---
 
+        // --- START: LOGOUT CONFIRM LOGIC ---
+
+        // Helper function to open the logout modal
+        function openLogoutModal() {
+            confirmLogoutModal.classList.add('show');
+        }
+
+        // Helper function to close the logout modal
+        function closeLogoutModal() {
+            confirmLogoutModal.classList.remove('show');
+        }
+
+        // 1. Close the modal with the 'X' button
+        closeLogoutModalBtn.addEventListener('click', () => {
+            closeLogoutModal();
+        });
+
+        // 2. Close the modal with the 'Cancel' button
+        cancelLogoutBtn.addEventListener('click', () => {
+            closeLogoutModal();
+        });
+
+        // 3. Handle the FINAL logout click
+        confirmLogoutBtn.addEventListener('click', async () => {
+            console.log('Signing out...');
+            const { error } = await db.auth.signOut();
+
+            if (error) {
+                console.error('Error signing out:', error.message);
+            } else {
+                console.log('User signed out successfully.');
+                // The onAuthStateChange listener will handle everything else
+            }
+
+            // Always close the modal after
+            closeLogoutModal();
+        });
+
+        // --- END: LOGOUT CONFIRM LOGIC ---
+
         // --- STEP 4: MANAGE SESSION ---
-        // This is the MOST important part. It runs when the page loads
-        // and checks if the user is already logged in.
+        // Important : This listener will automatically trigger on page load and checks if the user is already logged in.
 
         db.auth.onAuthStateChange((event, session) => {
             if (session) {
@@ -370,7 +469,8 @@
                 // Show the main chat app (we'll un-hide it, just in case)
                 chatApp.classList.remove('hidden');
                 userEmailDisplay.textContent = session.user.email;
-                // ----> This is where we will load the user's chats next <----
+                currentUserId = session.user.id;
+                // This is where we will load the user's chats next
                 // loadUserChats(session.user.id); 
 
             } else {
@@ -381,6 +481,7 @@
                 document.body.classList.add('auth-visible');
                 // Hide the main chat app
                 chatApp.classList.add('hidden');
+                currentUserId = null;
             }
         });
 

@@ -674,3 +674,13 @@ body.auth-visible .chat-app {
     background-color: var(--border-color);
     color: var(--text-light);
 }
+
+/* --- New style for Danger / Logout Button --- */
+.modal-btn.primary-danger {
+    background-color: var(--error-color); /* We defined this red color earlier */
+    color: var(--text-light);
+}
+.modal-btn.primary-danger:hover {
+    background-color: #a00000; /* A darker red on hover */
+    box-shadow: 0 0 10px var(--error-color);
+}
