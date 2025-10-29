@@ -8,8 +8,8 @@
     --text-light: #ffffff;
     --text-muted: #aaaaaa;
     --border-color: #300030;
-    --success-color: #00c000; /* Add this if not present */
-    --error-color: #c00000;   /* Add this if not present */
+    --success-color: #00c000;
+    --error-color: #c00000;
 
     /* New colors for the background gradient and glow */
     --gradient-start: #0a000a; /* Darker purple */
@@ -40,7 +40,6 @@ body {
     left: 0;
     width: 100%;
     height: 100%;
-    /* Keep existing background and blur, or change as desired */
     background: rgba(0, 0, 0, 0.7); /* Slightly transparent dark overlay */
     backdrop-filter: blur(8px); /* Less blur, or adjust as you like */
     display: flex;
@@ -159,26 +158,20 @@ body {
     display: none !important;
 }
 
-/* Password Field Styles */
-
-/* --- Add these new styles for the password toggle --- */
-
+/* --- Password Field Styles --- */
 .password-group {
     position: relative; /* This is the anchor for the absolute button */
 }
 
 .password-group .auth-input {
-    /* Add padding to the right to make space for the button */
-    padding-right: 45px; 
+    padding-right: 45px; /* Add padding to the right to make space for the button */
 }
 
 .password-toggle-btn {
     position: absolute;
-    /* This positions the button vertically centered with the input */
     top: 45px; /* Adjust this number if it's not centered */
     transform: translateY(-50%);
     right: 10px;
-    
     background: none;
     border: none;
     color: var(--text-muted);
@@ -191,7 +184,9 @@ body {
 .password-toggle-btn:hover {
     color: var(--text-light);
 }
+/* --- End Password Field Styles --- */
 
+/* --- Main App Layout --- */
 .chat-app {
     display: flex;
     height: 100vh;
@@ -204,7 +199,6 @@ body.auth-visible .chat-app {
     pointer-events: none; /* Prevent interaction with blurred app */
 }
 
-/* This hides the auth overlay completely when not needed */
 #auth-overlay.hidden {
     opacity: 0;
     visibility: hidden;
@@ -270,39 +264,84 @@ body.auth-visible .chat-app {
     font-size: 1.25rem;
     cursor: pointer;
 }
+/* --- End Main App Layout --- */
 
+/* --- Contacts List Panel --- */
 .contacts-list {
     list-style: none;
+    padding: 0; /* Remove default padding */
+    margin: 0; /* Remove default margin */
     overflow-y: auto;
     flex-grow: 1;
 }
 
-.contacts-list li {
+/* NEW: Custom scrollbar for the contacts list */
+.contacts-list::-webkit-scrollbar {
+    width: 6px;
+}
+.contacts-list::-webkit-scrollbar-track {
+    background: var(--bg-dark);
+}
+.contacts-list::-webkit-scrollbar-thumb {
+    background: #a000a0; /* Darker purple */
+    border-radius: 3px;
+}
+
+/* NEW: This styles the <li> we create in JavaScript */
+.contact-item {
     display: flex;
     align-items: center;
-    padding: 1rem;
+    padding: 0.75rem 1rem; /* 12px 16px */
     border-bottom: 1px solid var(--border-color);
     cursor: pointer;
-    transition: background-color 0.2s;
+    transition: background-color 0.2s ease, box-shadow 0.2s ease;
+    gap: 15px; /* Space between avatar and info */
 }
 
-.contacts-list li.active {
-    border-left: 4px solid var(--text-light);
-    background-color: #2a002a;
+.contact-item:last-child {
+    border-bottom: none; /* No border on the last item */
 }
 
-.contacts-list li:hover:not(.active) {
-    background-color: #2a002a;
+.contact-item:hover {
+    background-color: #2a002a; /* Same as your old hover */
 }
 
+/* NEW: This class will be added by JS on click */
+.contact-item.selected {
+    background-color: var(--primary-color);
+    box-shadow: 0 0 15px rgba(192, 0, 192, 0.5); /* Glow effect */
+}
+
+/* NEW: Placeholder for empty list */
+.chat-list-empty {
+    padding: 1.5rem;
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+}
+
+/* This is your existing avatar style, with new styles added */
 .avatar {
-    width: 44px;
-    height: 44px;
+    width: 45px; /* Slightly larger */
+    height: 45px;
     background-color: var(--primary-color);
     border-radius: 50%;
-    margin-right: 0.75rem;
+    margin-right: 0; /* We use 'gap' in the parent now */
     flex-shrink: 0;
+    /* NEW: Flex properties to center the initial */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: var(--text-light);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+    text-transform: uppercase;
 }
+.avatar span { /* This is the <span> with the letter */
+    line-height: 1; 
+}
+
 
 .contact-info {
     flex-grow: 1;
@@ -313,6 +352,21 @@ body.auth-visible .chat-app {
 .contact-info strong {
     display: block;
     font-weight: 600;
+    color: var(--text-light); /* Make sure text is light */
+    font-size: 1rem; /* Reset font size */
+}
+
+/* NEW: Style for the subtext */
+.contact-info small {
+    display: block;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+/* Make text light when its parent is selected */
+.contact-item.selected .contact-info strong,
+.contact-item.selected .contact-info small {
+    color: var(--text-light);
 }
 
 .contacts-list time {
@@ -321,13 +375,57 @@ body.auth-visible .chat-app {
     flex-shrink: 0;
     margin-left: 0.5rem;
 }
+/* --- End Contacts List Panel --- */
 
+/* --- Chat Panel --- */
 .chat-panel {
     flex-grow: 1;
     display: flex;
     flex-direction: column;
     background-color: var(--bg-medium);
 }
+
+/* NEW: Placeholder for when no chat is selected */
+#chat-placeholder {
+    flex-grow: 1;
+    display: flex; /* Show by default */
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    color: var(--text-muted);
+    padding: 2rem;
+    background-image: radial-gradient(var(--bg-pattern) 1px, transparent 1px);
+    background-size: 20px 20px;
+}
+#chat-placeholder i {
+    font-size: 4rem;
+    margin-bottom: 1.5rem;
+    opacity: 0.5;
+}
+#chat-placeholder p {
+    font-size: 1.25rem;
+    font-weight: 500;
+}
+#chat-placeholder small {
+    font-size: 0.9rem;
+    max-width: 300px;
+    margin-top: 0.5rem;
+    line-height: 1.5;
+}
+
+/* NEW: Chat window container */
+#chat-window {
+    flex-grow: 1;
+    display: none; /* Hide by default */
+    flex-direction: column;
+}
+
+/* NEW: This class will be added by JS to show the chat */
+#chat-window.active {
+    display: flex;
+}
+
 
 .chat-panel header {
     display: flex;
@@ -429,7 +527,9 @@ body.auth-visible .chat-app {
     background-image: radial-gradient(var(--bg-pattern) 1px, transparent 1px);
     background-size: 20px 20px;
 }
+/* --- End Chat Panel --- */
 
+/* --- Chat Messages --- */
 .message {
     max-width: 60%;
     width: fit-content;
@@ -458,7 +558,9 @@ body.auth-visible .chat-app {
     background-color: var(--bubble-sent);
     border-bottom-right-radius: 4px;
 }
+/* --- End Chat Messages --- */
 
+/* --- Chat Footer/Input --- */
 .chat-panel footer {
     display: flex;
     align-items: center;
@@ -474,7 +576,6 @@ body.auth-visible .chat-app {
     font-size: 1.5rem;
     margin-right: 0.75rem;
     cursor: pointer;
-    transform: rotate(-90deg);
 }
 
 .chat-panel footer input {
@@ -490,9 +591,9 @@ body.auth-visible .chat-app {
 .chat-panel footer input::placeholder {
     color: var(--text-muted);
 }
+/* --- End Chat Footer/Input --- */
 
-/* New User Info */
-
+/* --- New User Info --- */
 #user-info {
     padding: 1rem;
     background-color: var(--bg-medium);
@@ -525,10 +626,7 @@ body.auth-visible .chat-app {
     opacity: 1;
 }
 
-
-/* --- New Chat Modal Styles --- */
-
-/* This is the full-screen overlay, hidden by default */
+/* --- Modal Styles (for New Chat & Logout) --- */
 .modal-overlay {
     position: fixed;
     top: 0;
@@ -542,21 +640,19 @@ body.auth-visible .chat-app {
     align-items: center;
     z-index: 200; /* High z-index to be on top */
     
-    /* --- Hide it by default --- */
+    /* Hide it by default */
     opacity: 0;
     visibility: hidden;
     pointer-events: none;
     transition: opacity 0.3s ease, visibility 0.3s ease;
 }
 
-/* We will add this 'show' class with JavaScript to display the modal */
-.modal-overlay.show {
+.modal-overlay.show { /* We will add this 'show' class with JavaScript to display the modal */
     opacity: 1;
     visibility: visible;
     pointer-events: all;
 }
 
-/* This is the white content box in the middle */
 .modal-content {
     background-color: var(--bg-medium);
     padding: 2rem;
@@ -566,15 +662,13 @@ body.auth-visible .chat-app {
     max-width: 450px; /* A good width for this modal */
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
     
-    /* A subtle "pop-in" animation */
-    transform: scale(0.95);
+    transform: scale(0.95); /* A subtle "pop-in" animation */
     transition: transform 0.3s ease;
 }
 .modal-overlay.show .modal-content {
     transform: scale(1);
 }
 
-/* Modal Header: Title and Close Button */
 .modal-header {
     display: flex;
     justify-content: space-between;
@@ -597,7 +691,6 @@ body.auth-visible .chat-app {
     color: var(--text-light);
 }
 
-/* Modal Body */
 .modal-intro {
     font-size: 0.9rem;
     color: var(--text-muted);
@@ -605,8 +698,6 @@ body.auth-visible .chat-app {
     line-height: 1.5;
 }
 
-/* We can reuse the auth styles, but let's make specific ones */
-/* to be safe and self-contained. */
 .form-group {
     margin-bottom: 1.25rem;
 }
@@ -632,7 +723,6 @@ body.auth-visible .chat-app {
     box-shadow: 0 0 10px var(--primary-color);
 }
 
-/* Modal Error Message */
 .modal-error {
     color: var(--error-color); /* We defined this in auth styles */
     font-size: 0.9rem;
@@ -641,7 +731,6 @@ body.auth-visible .chat-app {
     display: none; /* Hidden by default */
 }
 
-/* Modal Footer Buttons */
 .modal-actions {
     display: flex;
     justify-content: flex-end;
@@ -675,7 +764,6 @@ body.auth-visible .chat-app {
     color: var(--text-light);
 }
 
-/* --- New style for Danger / Logout Button --- */
 .modal-btn.primary-danger {
     background-color: var(--error-color); /* We defined this red color earlier */
     color: var(--text-light);
@@ -684,3 +772,4 @@ body.auth-visible .chat-app {
     background-color: #a00000; /* A darker red on hover */
     box-shadow: 0 0 10px var(--error-color);
 }
+/* --- End Modal Styles --- */

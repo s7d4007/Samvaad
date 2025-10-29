@@ -84,7 +84,7 @@ signupForm.addEventListener('submit', async (e) => {
     const password = document.getElementById('signup-password').value;
 
     const { data: authData, error: authError } = await db.auth.signUp({ email, password });
-    
+
     if (authError) {
         signupError.textContent = authError.message;
         signupError.style.display = 'block';
@@ -92,9 +92,9 @@ signupForm.addEventListener('submit', async (e) => {
         return;
     }
 
-    const { error: profileError } = await db.from('profiles').insert({ 
-        id: authData.user.id, 
-        email: email 
+    const { error: profileError } = await db.from('profiles').insert({
+        id: authData.user.id,
+        email: email
     });
 
     if (profileError) {
@@ -113,7 +113,7 @@ loginForm.addEventListener('submit', async (e) => {
     const password = document.getElementById('login-password').value;
 
     const { data, error } = await db.auth.signInWithPassword({ email, password });
-    
+
     if (error) {
         loginError.textContent = error.message;
         loginError.style.display = 'block';
@@ -152,8 +152,8 @@ cancelNewChatBtn.addEventListener('click', () => {
 
 // Handle the form submission (NEW - v2)
 newChatForm.addEventListener('submit', async (e) => {
-    e.preventDefault(); 
-    
+    e.preventDefault();
+
     // Safety check: is the user logged in?
     if (!currentUserId) {
         console.error('User is not logged in or session is not ready.');
@@ -164,7 +164,7 @@ newChatForm.addEventListener('submit', async (e) => {
 
     // Get the email from the form
     const emailToChat = document.getElementById('new-chat-email').value;
-    const loggedInUserEmail = userEmailDisplay.textContent; 
+    const loggedInUserEmail = userEmailDisplay.textContent;
 
     // Clear any previous errors
     newChatError.textContent = '';
@@ -183,16 +183,16 @@ newChatForm.addEventListener('submit', async (e) => {
         newChatError.style.display = 'block';
         return; // Stop the function
     }
-    
+
     // --- START: NEW, SIMPLIFIED LOGIC ---
     try {
-        const { data: newChatId, error } = await db.rpc('create_new_chat', { 
-            target_user_email: emailToChat 
+        const { data: newChatId, error } = await db.rpc('create_new_chat', {
+            target_user_email: emailToChat
         });
 
         if (error) {
             console.error('Error creating chat:', error.message);
-            newChatError.textContent = error.message; 
+            newChatError.textContent = error.message;
             newChatError.style.display = 'block';
         } else {
             console.log('Successfully created chat! New Chat ID:', newChatId);
@@ -227,17 +227,76 @@ cancelLogoutBtn.addEventListener('click', () => {
 confirmLogoutBtn.addEventListener('click', async () => {
     console.log('Signing out...');
     const { error } = await db.auth.signOut();
-    
+
     if (error) {
         console.error('Error signing out:', error.message);
     } else {
         console.log('User signed out successfully.');
     }
-    
+
     closeLogoutModal();
 });
 // --- END: LOGOUT CONFIRM LOGIC ---
 
+// This function will fetch and display the user's real chats
+async function loadUserChats() {
+        console.log("Loading user chats...");
+        
+        if (!contactsList) return; // Safety check if the element doesn't exist
+
+        // This is the "whiteboard eraser"
+        contactsList.innerHTML = '';
+
+        try {
+            // 1. Call the database function we created
+            const { data: chats, error } = await db.rpc('get_my_chats');
+
+            if (error) {
+                console.error("Error loading chats:", error.message);
+                contactsList.innerHTML = '<li class="chat-list-empty">Error loading chats.</li>';
+                return;
+            }
+
+            // 2. We got the data, now let's render it
+            if (chats && chats.length > 0) {
+                
+                chats.forEach(chat => {
+                    // Create a new <li> element
+                    const li = document.createElement('li');
+                    
+                    // Add a class for styling
+                    li.classList.add('contact-item');
+                    
+                    // Add data attributes to store info about this chat
+                    li.dataset.chatId = chat.chat_id;
+                    li.dataset.chatEmail = chat.other_user_email;
+
+                    // Set the inner HTML for the chat item
+                    li.innerHTML = `
+                        <figure class="avatar">
+                            <!-- Get the first letter of the email for the avatar -->
+                            <span>${chat.other_user_email.charAt(0).toUpperCase()}</span>
+                        </figure>
+                        <div class="contact-info">
+                            <strong>${chat.other_user_email}</strong>
+                            <small>Click to open chat...</small>
+                        </div>
+                    `;
+                    
+                    // Add this new <li> to the list in the UI
+                    contactsList.appendChild(li);
+                });
+
+            } else {
+                // Show a "No chats yet" message
+                contactsList.innerHTML = '<li class="chat-list-empty">No chats yet. Click "+" to start one!</li>';
+            }
+
+        } catch (error) {
+            console.error("An unexpected JS error occurred:", error.message);
+            contactsList.innerHTML = '<li class="chat-list-empty">Error loading chats.</li>';
+        }
+    }
 
 // --- STEP 4: MANAGE SESSION ---
 db.auth.onAuthStateChange((event, session) => {
@@ -247,20 +306,18 @@ db.auth.onAuthStateChange((event, session) => {
         authOverlay.classList.add('hidden');
         document.body.classList.remove('auth-visible');
         chatApp.classList.remove('hidden');
-
         userEmailDisplay.textContent = session.user.email;
         currentUserId = session.user.id; 
         newChatBtn.disabled = false; // Enable the "New Chat" button
-        
-        // loadUserChats(currentUserId); 
-
+        // --- THIS IS THE UPDATED LINE ---
+        loadUserChats();
     } else {
         // User is LOGGED OUT
         console.log('Auth state changed: User is OUT');
         authOverlay.classList.remove('hidden');
         document.body.classList.add('auth-visible');
         chatApp.classList.add('hidden');
-        
+
         currentUserId = null;
         newChatBtn.disabled = true; // Disable the button if logged out
     }
