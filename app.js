@@ -1,14 +1,15 @@
 // --- STEP 1: INITIALIZE SUPABASE ---
 const { createClient } = supabase;
-// The variables SUPABASE_URL and SUPABASE_ANON_KEY
-// are available from the config.js file
+// The variables SUPABASE_URL and SUPABASE_ANON_KEY are available from the config.js file
 const db = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 console.log('SupABASE is connected!', db);
 
+//Global Variable Declarations
 let currentUserId = null; // Will hold the user's ID when logged in
+let selectedChatId = null; // This will store the ID of the active chat
+let isSessionReady = false; // This flag will prevent the double-load
 
 // --- STEP 2: GET DOM ELEMENTS ---
-// Auth Elements
 const authOverlay = document.getElementById('auth-overlay');
 const loginForm = document.getElementById('login-form');
 const signupForm = document.getElementById('signup-form');
@@ -16,20 +17,18 @@ const showSignupBtn = document.getElementById('show-signup-btn');
 const showLoginBtn = document.getElementById('show-login-btn');
 const loginError = document.getElementById('login-error');
 const signupError = document.getElementById('signup-error');
+const chatApp = document.querySelector('.chat-app');
 
-// Password Toggle Elements
+// Auth password toggle elements
 const loginPasswordInput = document.getElementById('login-password');
 const signupPasswordInput = document.getElementById('signup-password');
 const toggleLoginPasswordBtn = document.getElementById('toggle-login-password');
 const toggleSignupPasswordBtn = document.getElementById('toggle-signup-password');
 
-// Main App Elements
-const chatApp = document.querySelector('.chat-app');
+// User info display
 const userEmailDisplay = document.getElementById('user-email-display');
-const signOutBtn = document.getElementById('sign-out-btn');
-const contactsList = document.getElementById('contacts-list'); // The <ul> we'll use later
 
-// New Chat Modal Elements
+// New Chat Modal elements
 const newChatBtn = document.getElementById('new-chat-btn');
 const newChatModal = document.getElementById('new-chat-modal');
 const closeModalBtn = document.getElementById('close-modal-btn');
@@ -37,12 +36,20 @@ const cancelNewChatBtn = document.getElementById('cancel-new-chat-btn');
 const newChatForm = document.getElementById('new-chat-form');
 const newChatError = document.getElementById('new-chat-error');
 
-// Logout Modal Elements
+// Logout Modal elements
+const signOutBtn = document.getElementById('sign-out-btn');
 const confirmLogoutModal = document.getElementById('confirm-logout-modal');
 const closeLogoutModalBtn = document.getElementById('close-logout-modal-btn');
 const cancelLogoutBtn = document.getElementById('cancel-logout-btn');
 const confirmLogoutBtn = document.getElementById('confirm-logout-btn');
 
+// --- THESE ARE THE CRITICAL ONES YOU ARE MISSING ---
+const contactsList = document.getElementById('contacts-list');
+const chatPlaceholder = document.getElementById('chat-placeholder');
+const chatWindow = document.getElementById('chat-window');
+const chatHeaderName = document.getElementById('chat-header-name');
+const chatHeaderAvatar = document.getElementById('chat-header-avatar');
+// --- END OF CRITICAL ONES ---
 
 // --- STEP 3: HANDLE AUTH LOGIC ---
 
@@ -238,41 +245,58 @@ confirmLogoutBtn.addEventListener('click', async () => {
 });
 // --- END: LOGOUT CONFIRM LOGIC ---
 
+// --- START: CHAT SELECTION LOGIC ---
+contactsList.addEventListener('click', (e) => {
+    // Find the <li> element that was clicked on
+    // e.target is whatever the user *actually* clicked (like the <strong> or the <span>)
+    // .closest() finds the nearest parent with the class '.contact-item'
+    const clickedLi = e.target.closest('.contact-item');
+
+    // If the user clicked on empty space (or the 'No chats' message), do nothing
+    if (!clickedLi) {
+        return;
+    }
+    // We found the <li>! Call our new function with it.
+    selectChat(clickedLi);
+});
+// --- END: CHAT SELECTION LOGIC ---
+
+// NEW CHAT LIST
 // This function will fetch and display the user's real chats
 async function loadUserChats() {
-        console.log("Loading user chats...");
-        
-        if (!contactsList) return; // Safety check if the element doesn't exist
+    console.log("Loading user chats...");
 
-        // This is the "whiteboard eraser"
-        contactsList.innerHTML = '';
+    if (!contactsList) return; // Safety check if the element doesn't exist
 
-        try {
-            // 1. Call the database function we created
-            const { data: chats, error } = await db.rpc('get_my_chats');
+    // This is the "whiteboard eraser"
+    contactsList.innerHTML = '';
 
-            if (error) {
-                console.error("Error loading chats:", error.message);
-                contactsList.innerHTML = '<li class="chat-list-empty">Error loading chats.</li>';
-                return;
-            }
+    try {
+        // 1. Call the database function we created
+        const { data: chats, error } = await db.rpc('get_my_chats');
 
-            // 2. We got the data, now let's render it
-            if (chats && chats.length > 0) {
-                
-                chats.forEach(chat => {
-                    // Create a new <li> element
-                    const li = document.createElement('li');
-                    
-                    // Add a class for styling
-                    li.classList.add('contact-item');
-                    
-                    // Add data attributes to store info about this chat
-                    li.dataset.chatId = chat.chat_id;
-                    li.dataset.chatEmail = chat.other_user_email;
+        if (error) {
+            console.error("Error loading chats:", error.message);
+            contactsList.innerHTML = '<li class="chat-list-empty">Error loading chats.</li>';
+            return;
+        }
 
-                    // Set the inner HTML for the chat item
-                    li.innerHTML = `
+        // 2. We got the data, now let's render it
+        if (chats && chats.length > 0) {
+
+            chats.forEach(chat => {
+                // Create a new <li> element
+                const li = document.createElement('li');
+
+                // Add a class for styling
+                li.classList.add('contact-item');
+
+                // Add data attributes to store info about this chat
+                li.dataset.chatId = chat.chat_id;
+                li.dataset.chatEmail = chat.other_user_email;
+
+                // Set the inner HTML for the chat item
+                li.innerHTML = `
                         <figure class="avatar">
                             <!-- Get the first letter of the email for the avatar -->
                             <span>${chat.other_user_email.charAt(0).toUpperCase()}</span>
@@ -282,35 +306,82 @@ async function loadUserChats() {
                             <small>Click to open chat...</small>
                         </div>
                     `;
-                    
-                    // Add this new <li> to the list in the UI
-                    contactsList.appendChild(li);
-                });
 
-            } else {
-                // Show a "No chats yet" message
-                contactsList.innerHTML = '<li class="chat-list-empty">No chats yet. Click "+" to start one!</li>';
-            }
+                // Add this new <li> to the list in the UI
+                contactsList.appendChild(li);
+            });
 
-        } catch (error) {
-            console.error("An unexpected JS error occurred:", error.message);
-            contactsList.innerHTML = '<li class="chat-list-empty">Error loading chats.</li>';
+        } else {
+            // Show a "No chats yet" message
+            contactsList.innerHTML = '<li class="chat-list-empty">No chats yet. Click "+" to start one!</li>';
         }
+
+    } catch (error) {
+        console.error("An unexpected JS error occurred:", error.message);
+        contactsList.innerHTML = '<li class="chat-list-empty">Error loading chats.</li>';
     }
+}
+
+// This function handles opening a chat and highlighting the selection
+function selectChat(chatElement) {
+    // 1. Get the info from the clicked <li>
+    const chatId = chatElement.dataset.chatId;
+    const chatEmail = chatElement.dataset.chatEmail;
+    const firstLetter = chatEmail.charAt(0).toUpperCase();
+
+    // 2. Update the global selectedChatId
+    selectedChatId = chatId;
+    console.log(`Selected chat: ${selectedChatId} with ${chatEmail}`);
+
+    // 3. Handle the highlighting
+    // First, find any *other* item that is currently selected and remove the class
+    const currentlySelected = document.querySelector('.contact-item.selected');
+    if (currentlySelected) {
+        currentlySelected.classList.remove('selected');
+    }
+
+    // Now, add the 'selected' class to the one we just clicked
+    chatElement.classList.add('selected');
+
+    // 4. Update the main chat window
+    // Hide the placeholder and show the chat window
+    chatPlaceholder.style.display = 'none';
+    chatWindow.classList.add('active'); // This uses your .active CSS
+
+    // Update the header with the new chat's info
+    chatHeaderName.textContent = chatEmail;
+    chatHeaderAvatar.innerHTML = `<span>${firstLetter}</span>`;
+
+    // --- This is our next big step ---
+    // loadMessagesForChat(chatId);
+}
 
 // --- STEP 4: MANAGE SESSION ---
 db.auth.onAuthStateChange((event, session) => {
+
     if (session) {
-        // User is LOGGED IN
+        // --- THIS IS THE NEW CHECK ---
+        // If the session is already set up, don't run all this code again
+        if (isSessionReady) {
+            return; 
+        }
+        // --- END OF NEW CHECK ---
+
+        // User is LOGGED IN for the first time
         console.log('Auth state changed: User is IN', session.user.email);
         authOverlay.classList.add('hidden');
         document.body.classList.remove('auth-visible');
         chatApp.classList.remove('hidden');
+
         userEmailDisplay.textContent = session.user.email;
         currentUserId = session.user.id; 
         newChatBtn.disabled = false; // Enable the "New Chat" button
-        // --- THIS IS THE UPDATED LINE ---
-        loadUserChats();
+
+        loadUserChats(); 
+
+        // --- SET THE FLAG ---
+        isSessionReady = true; // Mark the session as ready
+
     } else {
         // User is LOGGED OUT
         console.log('Auth state changed: User is OUT');
@@ -320,5 +391,8 @@ db.auth.onAuthStateChange((event, session) => {
 
         currentUserId = null;
         newChatBtn.disabled = true; // Disable the button if logged out
+
+        // --- RESET THE FLAG ---
+        isSessionReady = false; // Reset the flag for the next login
     }
 });

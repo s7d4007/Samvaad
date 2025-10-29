@@ -90,45 +90,62 @@
             </button>
 
             <ul class="contacts-list" id="contacts-list">
-                
+
             </ul>
         </aside>
 
         <section class="chat-panel">
-            <header>
-                <figure class="avatar"></figure>
-                <strong>John Doe</strong>
-                <div class="chat-controls">
-                    <span class="search-icon"><i class="fa-solid fa-magnifying-glass"></i></span>
-                    <div class="dropdown-container">
-                        <button class="dropdown-toggle" title="More options"><i class="fa-solid fa-ellipsis-vertical"></i></button>
-                        <div class="dropdown-menu">
-                            <ul>
-                                <li><button class="dropdown-item">Clear chat</button></li>
-                                <li><button class="dropdown-item">Export chat</button></li>
-                            </ul>
+
+            <!-- 1. The Placeholder (visible by default) -->
+            <div id="chat-placeholder">
+                <i class="fas fa-comments"></i>
+                <p>Select a chat</p>
+                <small>Click on a contact from the list to see your messages.</small>
+            </div>
+
+            <!-- 2. The Chat Window (hidden by default) -->
+            <div id="chat-window">
+                <header>
+                    <!-- These are the new elements our JS is looking for -->
+                    <figure class="avatar" id="chat-header-avatar">
+                        <!-- Avatar initial will go here -->
+                    </figure>
+                    <strong id="chat-header-name">...</strong>
+
+                    <!-- This is your existing controls markup -->
+                    <div class="chat-controls">
+                        <span class="search-icon"><i class="fas fa-search"></i></span>
+                        <div class="dropdown-container">
+                            <button class="dropdown-toggle" title="More options">
+                                <i class="fas fa-ellipsis-v"></i>
+                            </button>
+                            <div class="dropdown-menu">
+                                <ul>
+                                    <li><button class="dropdown-item" id="clear-chat-btn">Clear chat</button></li>
+                                    <li><button class="dropdown-item" id="export-chat-btn">Export chat</button></li>
+                                </ul>
+                            </div>
                         </div>
                     </div>
-                </div>
-            </header>
-            <div class="messages-area">
-                <div class="message received">
-                    <p>Hi...</p>
-                </div>
-                <div class="message received">
-                    <p>How are you?</p>
-                </div>
-                <div class="message sent">
-                    <p>I am fine...</p>
-                </div>
-                <div class="message sent">
-                    <p>What about you?</p>
-                </div>
+                </header>
+
+                <main class="messages-area" id="messages-area">
+                    <!-- Messages will be loaded here by JavaScript -->
+                </main>
+
+                <footer>
+                    <button title="Attachments">
+                        <i class="fas fa-paperclip"></i>
+                    </button>
+                    <form id="message-form">
+                        <input type="text" id="message-input" placeholder="Type a message..." autocomplete="off">
+                        <button type="submit" title="Send Message">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </form>
+                </footer>
             </div>
-            <footer>
-                <button title="Send"><i class="fa-regular fa-paper-plane"></i></button>
-                <input type="text" placeholder="message...">
-            </footer>
+
         </section>
 
     </main>
@@ -181,4 +198,5 @@
     <script src="config.js"></script>
     <script type="module" src="app.js"></script>
 </body>
+
 </html>
