@@ -527,6 +527,16 @@ body.auth-visible .chat-app {
     background-image: radial-gradient(var(--bg-pattern) 1px, transparent 1px);
     background-size: 20px 20px;
 }
+
+.messages-area .chat-list-empty {
+    padding: 2rem;
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    margin-top: auto; /* Pushes the message to the top */
+    margin-bottom: auto; /* Pushes the message to the bottom */
+    /* This centers it vertically */
+}
 /* --- End Chat Panel --- */
 
 /* --- Chat Messages --- */

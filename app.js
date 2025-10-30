@@ -43,13 +43,16 @@ const closeLogoutModalBtn = document.getElementById('close-logout-modal-btn');
 const cancelLogoutBtn = document.getElementById('cancel-logout-btn');
 const confirmLogoutBtn = document.getElementById('confirm-logout-btn');
 
-// --- THESE ARE THE CRITICAL ONES YOU ARE MISSING ---
 const contactsList = document.getElementById('contacts-list');
 const chatPlaceholder = document.getElementById('chat-placeholder');
 const chatWindow = document.getElementById('chat-window');
 const chatHeaderName = document.getElementById('chat-header-name');
 const chatHeaderAvatar = document.getElementById('chat-header-avatar');
-// --- END OF CRITICAL ONES ---
+
+//Message Area elements
+const messagesArea = document.getElementById('messages-area');
+const messageForm = document.getElementById('message-form');
+const messageInput = document.getElementById('message-input');
 
 // --- STEP 3: HANDLE AUTH LOGIC ---
 
@@ -346,15 +349,73 @@ function selectChat(chatElement) {
     // 4. Update the main chat window
     // Hide the placeholder and show the chat window
     chatPlaceholder.style.display = 'none';
-    chatWindow.classList.add('active'); // This uses your .active CSS
+    chatWindow.classList.add('active'); // This uses .active CSS
 
     // Update the header with the new chat's info
     chatHeaderName.textContent = chatEmail;
     chatHeaderAvatar.innerHTML = `<span>${firstLetter}</span>`;
 
-    // --- This is our next big step ---
-    // loadMessagesForChat(chatId);
+   loadMessages(chatId);
 }
+
+async function loadMessages(chatId) {
+    if (!messagesArea) return; // Safety check
+    console.log(`Loading messages for chat: ${chatId}`);
+
+    // 1. Clear old messages and show a loading state
+    messagesArea.innerHTML = '<p class="chat-list-empty">Loading messages...</p>';
+
+    try {
+        // 2. Fetch messages from the database
+        // We also sort them by 'created_at' to show them in order
+        const { data: messages, error } = await db
+            .from('messages')
+            .select('*') // Get all columns
+            .eq('chat_id', chatId) // For this specific chat
+            .order('created_at', { ascending: true }); // Oldest first
+
+        if (error) {
+            console.error("Error loading messages:", error.message);
+            messagesArea.innerHTML = '<p class="chat-list-empty">Error loading messages.</p>';
+            return;
+        }
+
+        // 3. Clear the "Loading..." message
+        messagesArea.innerHTML = '';
+
+        // 4. Render the new messages
+        if (messages && messages.length > 0) {
+            messages.forEach(message => {
+                // Check if the message was sent by the current user
+                const isSent = message.sender_id === currentUserId;
+                const messageClass = isSent ? 'sent' : 'received';
+
+                // Create the message element
+                const messageDiv = document.createElement('div');
+                messageDiv.classList.add('message', messageClass);
+
+                // Set the inner HTML. We use <p> for the bubble.
+                // (We'll add image/text logic here later)
+                messageDiv.innerHTML = `<p>${message.content}</p>`;
+
+                // Add this new <div> to the messages area
+                messagesArea.appendChild(messageDiv);
+            });
+        } else {
+            // Show a "No messages yet" message
+            messagesArea.innerHTML = '<p class="chat-list-empty">No messages yet. Say hi!</p>';
+        }
+
+        // 5. Scroll to the bottom to show the latest message
+        messagesArea.scrollTop = messagesArea.scrollHeight;
+
+    } catch (error) {
+        console.error("An unexpected JS error occurred:", error.message);
+        messagesArea.innerHTML = '<p class="chat-list-empty">Error loading messages.</p>';
+    }
+}
+
+// --- END: NEW CHAT LIST LOGIC ---
 
 // --- STEP 4: MANAGE SESSION ---
 db.auth.onAuthStateChange((event, session) => {
