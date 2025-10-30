@@ -577,6 +577,7 @@ body.auth-visible .chat-app {
     padding: 0.75rem 1rem;
     background-color: var(--primary-color);
     flex-shrink: 0;
+    gap: 0.75rem; /* Add space between buttons and form */
 }
 
 .chat-panel footer button {
@@ -584,24 +585,38 @@ body.auth-visible .chat-app {
     border: none;
     color: var(--text-light);
     font-size: 1.5rem;
-    margin-right: 0.75rem;
     cursor: pointer;
+    flex-shrink: 0; /* Stop buttons from shrinking */
 }
 
-.chat-panel footer input {
-    flex-grow: 1;
+/* --- THIS IS THE NEW, IMPORTANT PART --- */
+#message-form {
+    display: flex; /* Make the form a flex container */
+    flex-grow: 1; /* Tell the form to take all available space */
+    align-items: center;
     background-color: var(--bg-dark);
+    border-radius: 20px; /* Move the rounded corners to the form */
+}
+
+#message-form input {
+    flex-grow: 1; /* Tell the input to take all space *inside* the form */
+    background: transparent; /* Make the input transparent */
     border: none;
     padding: 0.75rem 1rem;
-    border-radius: 20px;
     color: var(--text-light);
     font-size: 1rem;
+    outline: none; /* No outline on focus */
 }
 
-.chat-panel footer input::placeholder {
+#message-form button {
+    margin-right: 0.5rem; /* Space for the send button */
+    padding: 0.5rem; /* Make it easier to click */
+}
+
+#message-form input::placeholder {
     color: var(--text-muted);
 }
-/* --- End Chat Footer/Input --- */
+/* --- END OF CHAT FOOTER INPUT --- */
 
 /* --- New User Info --- */
 #user-info {

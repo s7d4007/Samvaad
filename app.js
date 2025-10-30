@@ -8,6 +8,7 @@ console.log('SupABASE is connected!', db);
 let currentUserId = null; // Will hold the user's ID when logged in
 let selectedChatId = null; // This will store the ID of the active chat
 let isSessionReady = false; // This flag will prevent the double-load
+let currentChatChannel = null; // This will hold our active chat subscription
 
 // --- STEP 2: GET DOM ELEMENTS ---
 const authOverlay = document.getElementById('auth-overlay');
@@ -53,6 +54,7 @@ const chatHeaderAvatar = document.getElementById('chat-header-avatar');
 const messagesArea = document.getElementById('messages-area');
 const messageForm = document.getElementById('message-form');
 const messageInput = document.getElementById('message-input');
+const messageSendBtn = messageForm.querySelector('button');
 
 // --- STEP 3: HANDLE AUTH LOGIC ---
 
@@ -264,7 +266,88 @@ contactsList.addEventListener('click', (e) => {
 });
 // --- END: CHAT SELECTION LOGIC ---
 
-// NEW CHAT LIST
+// --- START: SEND MESSAGE LOGIC ---
+messageForm.addEventListener('submit', async (e) => {
+    // --- THIS IS THE FIX ---
+    // 1. Prevent the page from reloading!
+    e.preventDefault();
+    // --- END OF FIX ---
+
+    // 2. Get the message text
+    const messageText = messageInput.value.trim();
+
+    // 3. Check if it's empty or if no chat is selected
+    if (!messageText || !selectedChatId || !currentUserId) {
+        console.log("Cannot send message: no text, chat, or user.");
+        return; // Don't do anything
+    }
+
+    console.log(`Sending message to chat ${selectedChatId}: ${messageText}`);
+
+    try {
+        // 4. Send the message to the database
+        const { error } = await db
+            .from('messages')
+            .insert({
+                chat_id: selectedChatId,
+                sender_id: currentUserId,
+                content: messageText,
+                message_type: 'text' // We'll use this later for images
+            });
+
+        if (error) {
+            console.error("Error sending message:", error.message);
+            // TODO: Show an error in the UI
+        } else {
+            // 5. Success! Clear the input field
+            messageInput.value = '';
+            // The input field will clear, but the message won't appear
+            // until we add Realtime.
+        }
+
+    } catch (error) {
+        console.error("An unexpected JS error occurred:", error.message);
+    }
+});
+// --- END: SEND MESSAGE LOGIC ---
+
+// HELPER FUNCTION
+
+// This function just creates the HTML for a single message
+function displayMessage(message) {
+    if (!messagesArea) return; // Safety check
+
+    // Check if we're at the bottom before adding the new message
+    const shouldScroll = messagesArea.scrollTop + messagesArea.clientHeight === messagesArea.scrollHeight;
+
+    // Check if this is a "No messages" placeholder
+    const placeholder = messagesArea.querySelector('.chat-list-empty');
+    if (placeholder) {
+        placeholder.remove(); // Remove "No messages yet"
+    }
+
+    // Check if the message was sent by the current user
+    const isSent = message.sender_id === currentUserId;
+    const messageClass = isSent ? 'sent' : 'received';
+
+    // Create the message element
+    const messageDiv = document.createElement('div');
+    messageDiv.classList.add('message', messageClass);
+
+    // Set the inner HTML. We use <p> for the bubble.
+    // (We'll add image/text logic here later)
+    messageDiv.innerHTML = `<p>${message.content}</p>`;
+
+    // Add this new <div> to the messages area
+    messagesArea.appendChild(messageDiv);
+
+    // Scroll to the bottom only if we were already at the bottom
+    if (shouldScroll) {
+        messagesArea.scrollTop = messagesArea.scrollHeight;
+    }
+}
+
+// NEW CHAT LIST LOGIC
 // This function will fetch and display the user's real chats
 async function loadUserChats() {
     console.log("Loading user chats...");
@@ -355,8 +438,11 @@ function selectChat(chatElement) {
     chatHeaderName.textContent = chatEmail;
     chatHeaderAvatar.innerHTML = `<span>${firstLetter}</span>`;
 
-   loadMessages(chatId);
+    loadMessages(chatId);
+    subscribeToChat(chatId);
 }
+
+//Loading Messages into the chat window
 
 async function loadMessages(chatId) {
     if (!messagesArea) return; // Safety check
@@ -367,12 +453,11 @@ async function loadMessages(chatId) {
 
     try {
         // 2. Fetch messages from the database
-        // We also sort them by 'created_at' to show them in order
         const { data: messages, error } = await db
             .from('messages')
-            .select('*') // Get all columns
-            .eq('chat_id', chatId) // For this specific chat
-            .order('created_at', { ascending: true }); // Oldest first
+            .select('*')
+            .eq('chat_id', chatId)
+            .order('created_at', { ascending: true });
 
         if (error) {
             console.error("Error loading messages:", error.message);
@@ -385,22 +470,14 @@ async function loadMessages(chatId) {
 
         // 4. Render the new messages
         if (messages && messages.length > 0) {
+
+            // --- THIS IS THE UPDATED PART ---
+            // We just loop and call our new helper
             messages.forEach(message => {
-                // Check if the message was sent by the current user
-                const isSent = message.sender_id === currentUserId;
-                const messageClass = isSent ? 'sent' : 'received';
-
-                // Create the message element
-                const messageDiv = document.createElement('div');
-                messageDiv.classList.add('message', messageClass);
-
-                // Set the inner HTML. We use <p> for the bubble.
-                // (We'll add image/text logic here later)
-                messageDiv.innerHTML = `<p>${message.content}</p>`;
-
-                // Add this new <div> to the messages area
-                messagesArea.appendChild(messageDiv);
+                displayMessage(message); 
             });
+            // --- END OF UPDATED PART ---
+
         } else {
             // Show a "No messages yet" message
             messagesArea.innerHTML = '<p class="chat-list-empty">No messages yet. Say hi!</p>';
@@ -415,6 +492,48 @@ async function loadMessages(chatId) {
     }
 }
 
+//Realtime Function
+
+function subscribeToChat(chatId) {
+    // 1. Unsubscribe from any old chat channel
+    if (currentChatChannel) {
+        console.log(`Unsubscribing from old chat: ${currentChatChannel.topic}`);
+        db.removeChannel(currentChatChannel);
+        currentChatChannel = null;
+    }
+
+    // 2. Create a new "channel" to listen to
+    // We'll listen for any INSERTS on the 'messages' table
+    // where the 'chat_id' matches our current chat.
+    const channel = db.channel(`chat:${chatId}`);
+
+    currentChatChannel = channel.on(
+        'postgres_changes', // This is the event type
+        {
+            event: 'INSERT',
+            schema: 'public',
+            table: 'messages',
+            filter: `chat_id=eq.${chatId}`
+        },
+        (payload) => {
+            // 3. A new message has arrived!
+            console.log('New message received!', payload.new);
+
+            // 4. Use our helper function to display it!
+            // We pass payload.new, which is the new message object
+            displayMessage(payload.new);
+        }
+    )
+    .subscribe((status) => {
+        if (status === 'SUBSCRIBED') {
+            console.log(`Successfully subscribed to chat: ${chatId}`);
+        } else {
+            console.log(`Failed to subscribe to chat: ${chatId}. Status: ${status}`);
+        }
+    });
+}
+// --- END OF REALTIME FUNCTION ---
+
 // --- END: NEW CHAT LIST LOGIC ---
 
 // --- STEP 4: MANAGE SESSION ---
@@ -424,7 +543,7 @@ db.auth.onAuthStateChange((event, session) => {
         // --- THIS IS THE NEW CHECK ---
         // If the session is already set up, don't run all this code again
         if (isSessionReady) {
-            return; 
+            return;
         }
         // --- END OF NEW CHECK ---
 
@@ -433,16 +552,13 @@ db.auth.onAuthStateChange((event, session) => {
         authOverlay.classList.add('hidden');
         document.body.classList.remove('auth-visible');
         chatApp.classList.remove('hidden');
-
         userEmailDisplay.textContent = session.user.email;
-        currentUserId = session.user.id; 
+        currentUserId = session.user.id;
         newChatBtn.disabled = false; // Enable the "New Chat" button
-
-        loadUserChats(); 
-
-        // --- SET THE FLAG ---
+        messageInput.disabled = false;
+        messageSendBtn.disabled = false;
+        loadUserChats();
         isSessionReady = true; // Mark the session as ready
-
     } else {
         // User is LOGGED OUT
         console.log('Auth state changed: User is OUT');
@@ -452,7 +568,8 @@ db.auth.onAuthStateChange((event, session) => {
 
         currentUserId = null;
         newChatBtn.disabled = true; // Disable the button if logged out
-
+        messageInput.disabled = true;
+        messageSendBtn.disabled = true;
         // --- RESET THE FLAG ---
         isSessionReady = false; // Reset the flag for the next login
     }
