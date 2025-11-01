@@ -56,6 +56,9 @@ const messageForm = document.getElementById('message-form');
 const messageInput = document.getElementById('message-input');
 const messageSendBtn = messageForm.querySelector('button');
 
+//Loader Element
+const fullPageLoader = document.getElementById('full-page-loader');
+
 // --- STEP 3: HANDLE AUTH LOGIC ---
 
 // Toggle between login and signup forms
@@ -539,7 +542,6 @@ function subscribeToChat(chatId) {
     });
 }
 // --- END OF REALTIME FUNCTION ---
-
 // --- END: NEW CHAT LIST LOGIC ---
 
 // --- STEP 4: MANAGE SESSION ---
@@ -564,12 +566,14 @@ db.auth.onAuthStateChange((event, session) => {
         messageInput.disabled = false;
         messageSendBtn.disabled = false;
         loadUserChats();
+        fullPageLoader.classList.add('hidden'); // Hide the loader
         isSessionReady = true; // Mark the session as ready
     } else {
         // User is LOGGED OUT
         console.log('Auth state changed: User is OUT');
         authOverlay.classList.remove('hidden');
         document.body.classList.add('auth-visible');
+        fullPageLoader.classList.add('hidden'); // Hide the loader
         chatApp.classList.add('hidden');
 
         currentUserId = null;

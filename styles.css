@@ -33,6 +33,60 @@ body {
     overflow: hidden;
 }
 
+/* --- START: Full-Page Loader Styles --- */
+#full-page-loader {
+    position: fixed;        /* Cover the whole screen */
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 999;           /* Be on top of everything */
+    background: var(--bg-dark); /* Same as your app background */
+
+    display: flex;          /* Center the spinner and text */
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 1.5rem;
+
+    /* Fade out smoothly when hidden */
+    opacity: 1;
+    transition: opacity 0.5s ease;
+}
+
+/* We will add this class with JS to hide it */
+#full-page-loader.hidden {
+    opacity: 0;
+    pointer-events: none; /* Let clicks go through when hidden */
+}
+
+#full-page-loader p {
+    font-size: 1rem;
+    color: var(--text-muted);
+    font-weight: 500;
+}
+
+/* This is the CSS for the spinning circle */
+.loader-spinner {
+    width: 50px;
+    height: 50px;
+    border: 5px solid var(--border-color); /* Light grey ring */
+    border-top-color: var(--primary-color); /* Purple "spinning" part */
+    border-radius: 50%;
+    animation: spin 1s linear infinite; /* The animation */
+}
+
+/* This is the animation code */
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+/* --- END: Full-Page Loader Styles --- */
+
 /* --- Auth Overlay Styles --- */
 #auth-overlay {
     position: fixed;
