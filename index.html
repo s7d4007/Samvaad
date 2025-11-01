@@ -143,7 +143,8 @@
                         <i class="fas fa-paperclip"></i>
                     </button>
                     <form id="message-form">
-                        <input type="text" id="message-input" placeholder="Type a message..." autocomplete="off" disabled>
+                        <input type="text" id="message-input" placeholder="Type a message..." autocomplete="off"
+                            disabled>
                         <button type="submit" title="Send Message" disabled>
                             <i class="fas fa-paper-plane"></i>
                         </button>
@@ -200,6 +201,43 @@
             </div>
         </div>
     </div>
+    <!-- --- END: Confirm Logout Modal --- -->
+
+    <!-- --- START: NEW Verify Email Modal --- -->
+    <div id="verify-otp-modal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Check Your Email</h3>
+            </div>
+            <form id="verify-otp-form">
+                <p class="modal-intro">
+                    We sent a 6-digit confirmation code to:
+                    <br>
+                    <strong id="otp-email-display">...your-email...</strong>
+                    <br><br>
+                    Please enter the code below to continue.
+                </p>
+
+                <div class="form-group">
+                    <label for="otp-input">Verification Code</label>
+                    <input type="text" id="otp-input" class="modal-input" required maxlength="6" pattern="\d{6}"
+                        title="Please enter a 6-digit code.">
+                </div>
+
+                <p id="otp-error" class="modal-error"></p>
+
+                <div class="modal-actions">
+                    <button type="submit" class="modal-btn primary">Verify and Log In</button>
+                </div>
+
+                <p class="auth-toggle">
+                    <button type="button" id="resend-otp-btn" class="auth-toggle-btn">Resend Code</button>
+                </p>
+            </form>
+        </div>
+    </div>
+    <!-- --- END: NEW Verify Email Modal --- -->
+
     <script src="config.js"></script>
     <script type="module" src="app.js"></script>
 </body>

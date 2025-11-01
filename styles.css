@@ -852,3 +852,27 @@ body.auth-visible .chat-app {
     box-shadow: 0 0 10px var(--error-color);
 }
 /* --- End Modal Styles --- */
+
+/* --- START: Verify OTP Modal Styles --- */
+
+/* Style for the email address display inside the modal */
+#otp-email-display {
+    color: var(--text-light); /* Make the email stand out */
+    font-weight: 600;
+    word-break: break-all; /* In case it's a long email */
+}
+
+/* Style for the 6-digit OTP input */
+#otp-input {
+    font-size: 1.5rem; /* Make the text bigger */
+    text-align: center; /* Center the 6 digits */
+    letter-spacing: 0.5rem; /* Space out the numbers */
+    font-weight: 600;
+    color: var(--glow-color); /* Make the numbers purple */
+}
+
+/* Style for the 'Resend Code' button */
+#resend-otp-btn {
+    width: 100%; /* Make it full-width like the main buttons */
+}
+/* --- END: Verify OTP Modal Styles --- */

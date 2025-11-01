@@ -9,6 +9,7 @@ let currentUserId = null; // Will hold the user's ID when logged in
 let selectedChatId = null; // This will store the ID of the active chat
 let isSessionReady = false; // This flag will prevent the double-load
 let currentChatChannel = null; // This will hold our active chat subscription
+let emailForVerification = ''; // Stores the email during OTP check
 
 // --- STEP 2: GET DOM ELEMENTS ---
 const authOverlay = document.getElementById('auth-overlay');
@@ -59,6 +60,14 @@ const messageSendBtn = messageForm.querySelector('button');
 //Loader Element
 const fullPageLoader = document.getElementById('full-page-loader');
 
+// OTP Modal elements
+const verifyOtpModal = document.getElementById('verify-otp-modal');
+const verifyOtpForm = document.getElementById('verify-otp-form');
+const otpEmailDisplay = document.getElementById('otp-email-display');
+const otpInput = document.getElementById('otp-input');
+const otpError = document.getElementById('otp-error');
+const resendOtpBtn = document.getElementById('resend-otp-btn');
+
 // --- STEP 3: HANDLE AUTH LOGIC ---
 
 // Toggle between login and signup forms
@@ -92,13 +101,21 @@ toggleSignupPasswordBtn.addEventListener('click', () => {
     togglePassword(signupPasswordInput, toggleSignupPasswordBtn);
 });
 
-// Handle Sign Up
+// Handle Sign Up (NEW v2 - With OTP)
 signupForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     const email = document.getElementById('signup-email').value;
     const password = document.getElementById('signup-password').value;
 
-    const { data: authData, error: authError } = await db.auth.signUp({ email, password });
+    // Clear any old errors
+    signupError.textContent = '';
+    signupError.style.display = 'block';
+
+    // 1. Sign up the user (this will send the OTP email)
+    const { data, error: authError } = await db.auth.signUp({
+        email,
+        password
+    });
 
     if (authError) {
         signupError.textContent = authError.message;
@@ -107,17 +124,29 @@ signupForm.addEventListener('submit', async (e) => {
         return;
     }
 
-    const { error: profileError } = await db.from('profiles').insert({
-        id: authData.user.id,
-        email: email
-    });
+    // 2. Check if the user was created successfully
+    // We now expect data.user to exist, but data.session to be null
+    if (data.user) {
+        console.log('User created, awaiting verification:', data.user.email);
 
-    if (profileError) {
-        signupError.textContent = 'Failed to create profile: ' + profileError.message;
-        signupError.style.display = 'block';
-        console.error('Profile Error:', profileError.message);
+        // 3. Store the email for the next step
+        emailForVerification = data.user.email;
+
+        // 4. Update the OTP modal to show the email
+        otpEmailDisplay.textContent = data.user.email;
+
+        // 5. Hide the login/signup overlay
+        authOverlay.classList.add('hidden');
+        document.body.classList.remove('auth-visible');
+
+        // 6. Show the NEW OTP verification modal
+        verifyOtpModal.classList.add('show');
+        otpInput.focus(); // Focus the input field
+
     } else {
-        console.log('User signed up and profile created!');
+        // This is a fallback, should not happen if authError is null
+        signupError.textContent = 'An unknown error occurred. Please try again.';
+        signupError.style.display = 'block';
     }
 });
 
@@ -213,8 +242,8 @@ newChatForm.addEventListener('submit', async (e) => {
             console.log('Successfully created chat! New Chat ID:', newChatId);
             // Close the modal
             closeNewChatModal();
-               // 1. Manually refresh the chat list
-            await loadUserChats(); 
+            // 1. Manually refresh the chat list
+            await loadUserChats();
             // 2. (Bonus UX) Find the new chat in the list and select it
             const newChatElement = document.querySelector(`.contact-item[data-chat-id="${newChatId}"]`);
             if (newChatElement) {
@@ -231,6 +260,98 @@ newChatForm.addEventListener('submit', async (e) => {
 });
 // --- END: NEW CHAT MODAL LOGIC ---
 
+// --- START: NEW OTP VERIFICATION LOGIC ---
+
+verifyOtpForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const token = otpInput.value;
+
+    // Clear any old errors
+    otpError.textContent = '';
+    otpError.style.display = 'none';
+
+    if (!emailForVerification || !token) {
+        otpError.textContent = 'Email or token is missing. Please try again.';
+        otpError.style.display = 'block';
+        return;
+    }
+
+    try {
+        // 1. Verify the 6-digit code
+        const { data, error: verifyError } = await db.auth.verifyOtp({
+            email: emailForVerification,
+            token: token,
+            type: 'signup'
+        });
+
+        if (verifyError) {
+            console.error('OTP Verify Error:', verifyError.message);
+            otpError.textContent = 'Invalid or expired code. Please try again.';
+            otpError.style.display = 'block';
+            return;
+        }
+
+        // 2. SUCCESS! The user is now logged in.
+        //    data.user and data.session are now available.
+        //    NOW we must create their 'profiles' row.
+        console.log('OTP Verified! User is logged in:', data.user.email);
+
+        const { error: profileError } = await db.from('profiles').insert({
+            id: data.user.id,
+            email: data.user.email
+        });
+
+        if (profileError) {
+            // This is bad, the user is logged in but has no profile.
+            // We should tell them to contact support or retry.
+            console.error('Profile Creation Error after OTP:', profileError.message);
+            otpError.textContent = 'Login successful, but profile creation failed. Please contact support.';
+            otpError.style.display = 'block';
+            return;
+        }
+
+        // 3. FULL SUCCESS!
+        // The user is logged in AND their profile is created.
+        // We can just hide the modal.
+        console.log('Profile created successfully.');
+        verifyOtpModal.classList.remove('show');
+        emailForVerification = ''; // Clear the temp email
+
+        // The main 'onAuthStateChange' listener will
+        // automatically take over from here and load the app!
+
+    } catch (error) {
+        console.error('An unexpected error occurred:', error.message);
+        otpError.textContent = 'An unexpected error occurred. Please try again.';
+        otpError.style.display = 'block';
+    }
+});
+
+// Handle "Resend Code"
+resendOtpBtn.addEventListener('click', async () => {
+    if (!emailForVerification) {
+        otpError.textContent = 'Could not find email. Please refresh and sign up again.';
+        otpError.style.display = 'block';
+        return;
+    }
+
+    // This will resend the OTP email
+    const { error } = await db.auth.resend({
+        type: 'signup',
+        email: emailForVerification
+    });
+
+    if (error) {
+        console.error('Resend Error:', error.message);
+        otpError.textContent = error.message;
+        otpError.style.display = 'block';
+    } else {
+        console.log('Resent OTP email to:', emailForVerification);
+        otpError.textContent = 'A new code has been sent to your email.';
+        otpError.style.display = 'block';
+    }
+});
+// --- END: NEW OTP VERIFICATION LOGIC ---
 
 // --- START: LOGOUT CONFIRM LOGIC ---
 function openLogoutModal() {
@@ -483,7 +604,7 @@ async function loadMessages(chatId) {
             // --- THIS IS THE UPDATED PART ---
             // We just loop and call our new helper
             messages.forEach(message => {
-                displayMessage(message); 
+                displayMessage(message);
             });
             // --- END OF UPDATED PART ---
 
@@ -533,13 +654,13 @@ function subscribeToChat(chatId) {
             displayMessage(payload.new);
         }
     )
-    .subscribe((status) => {
-        if (status === 'SUBSCRIBED') {
-            console.log(`Successfully subscribed to chat: ${chatId}`);
-        } else {
-            console.log(`Failed to subscribe to chat: ${chatId}. Status: ${status}`);
-        }
-    });
+        .subscribe((status) => {
+            if (status === 'SUBSCRIBED') {
+                console.log(`Successfully subscribed to chat: ${chatId}`);
+            } else {
+                console.log(`Failed to subscribe to chat: ${chatId}. Status: ${status}`);
+            }
+        });
 }
 // --- END OF REALTIME FUNCTION ---
 // --- END: NEW CHAT LIST LOGIC ---

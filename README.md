@@ -6,14 +6,14 @@ This repository is for **showcase and portfolio purposes only**.
 
 ## Features
 
-* **Secure Authentication:** Full user signup, login, and logout flow using Supabase Auth.
+* **Secure Authentication:** Full secure user signup, login, and logout flow using  OTP email verification.
 * **Real-Time Messaging:** Messages appear instantly on both users' screens without a page refresh using Supabase Realtime Subscriptions.
 * **1-on-1 Chat Creation:** Users can find other users by their email address to start a new, private conversation.
 * **Dynamic Chat List:** The contact list is dynamically loaded from the database, showing only the current user's active chats.
 
 ## Project Status
 
-**Version:** 1.0
+**Version:** 2.0
 
 The core functionality for 1-on-1 real-time chat is complete and working.
 
