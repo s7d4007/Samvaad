@@ -208,9 +208,15 @@ newChatForm.addEventListener('submit', async (e) => {
             newChatError.style.display = 'block';
         } else {
             console.log('Successfully created chat! New Chat ID:', newChatId);
+            // Close the modal
             closeNewChatModal();
-            // await loadUserChats(currentUserId);
-            // selectChat(newChatId, emailToChat); 
+               // 1. Manually refresh the chat list
+            await loadUserChats(); 
+            // 2. (Bonus UX) Find the new chat in the list and select it
+            const newChatElement = document.querySelector(`.contact-item[data-chat-id="${newChatId}"]`);
+            if (newChatElement) {
+                selectChat(newChatElement);
+            }
         }
 
     } catch (error) {
