@@ -1,4 +1,4 @@
-# Real-Time Chat Application (Supabase & JavaScript)
+# Samvaad - Real_Time Chat Application
 
 This is a full-stack, real-time chat application built to demonstrate advanced backend and frontend development skills. The frontend is built with pure HTML5, CSS3, and modern JavaScript, while the backend is fully powered by Supabase.
 
