@@ -1,20 +1,26 @@
 :root {
-    --primary-color: #c000c0;
-    --bg-dark: #140014;
-    --bg-medium: #1e001e;
-    --bg-pattern: #300030;
-    --bubble-sent: #520052;
-    --bubble-received: #7b2a7b;
-    --text-light: #ffffff;
-    --text-muted: #aaaaaa;
-    --border-color: #300030;
-    --success-color: #00c000;
-    --error-color: #c00000;
+    --primary-color: #007BFF;
+    --primary-color-rgb: 0, 123, 255;
+    --primary-color-dark: #0056b3;
+    
+    --bg-dark: #18191A;
+    --bg-medium: #242526;
+    --bg-light-hover: #3A3B3C;
+    
+    --border-color: #3A3B3C;
+    
+    --bubble-sent: #007BFF;
+    --bubble-received: #3E4042;
+    
+    --text-light: #E4E6EB;
+    --text-muted: #B0B3B8;
+    --text-color: #E4E6EB;
 
-    /* New colors for the background gradient and glow */
-    --gradient-start: #0a000a; /* Darker purple */
-    --gradient-end: #2a002a;   /* Slightly lighter purple */
-    --glow-color: #d000d0;     /* Brighter purple for glow */
+    --success-color: #28a745;
+    --error-color: #dc3545;
+    --error-color-dark: #b22222;
+
+    --glow-color: #007BFF;
 }
 
 * {
@@ -33,31 +39,26 @@ body {
     overflow: hidden;
 }
 
-/* --- START: Full-Page Loader Styles --- */
 #full-page-loader {
-    position: fixed;        /* Cover the whole screen */
+    position: fixed;
     top: 0;
     left: 0;
     width: 100vw;
     height: 100vh;
-    z-index: 999;           /* Be on top of everything */
-    background: var(--bg-dark); /* Same as your app background */
-
-    display: flex;          /* Center the spinner and text */
+    z-index: 999;
+    background: var(--bg-dark);
+    display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
     gap: 1.5rem;
-
-    /* Fade out smoothly when hidden */
     opacity: 1;
     transition: opacity 0.5s ease;
 }
 
-/* We will add this class with JS to hide it */
 #full-page-loader.hidden {
     opacity: 0;
-    pointer-events: none; /* Let clicks go through when hidden */
+    pointer-events: none;
 }
 
 #full-page-loader p {
@@ -66,17 +67,15 @@ body {
     font-weight: 500;
 }
 
-/* This is the CSS for the spinning circle */
 .loader-spinner {
     width: 50px;
     height: 50px;
-    border: 5px solid var(--border-color); /* Light grey ring */
-    border-top-color: var(--primary-color); /* Purple "spinning" part */
+    border: 5px solid var(--border-color);
+    border-top-color: var(--primary-color);
     border-radius: 50%;
-    animation: spin 1s linear infinite; /* The animation */
+    animation: spin 1s linear infinite;
 }
 
-/* This is the animation code */
 @keyframes spin {
     from {
         transform: rotate(0deg);
@@ -85,17 +84,15 @@ body {
         transform: rotate(360deg);
     }
 }
-/* --- END: Full-Page Loader Styles --- */
 
-/* --- Auth Overlay Styles --- */
 #auth-overlay {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.7); /* Slightly transparent dark overlay */
-    backdrop-filter: blur(8px); /* Less blur, or adjust as you like */
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(8px);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -111,23 +108,23 @@ body {
     width: 100%;
     max-width: 400px;
     box-shadow: 
-        0 4px 15px rgba(0, 0, 0, 0.4), /* Deeper shadow for depth */
-        0 0 30px var(--glow-color);    /* The glow effect */
-    transition: all 0.3s ease; /* Smooth transition for hover effects */
-}
-
-#auth-container h2 {
-    text-align: center;
-    color: var(--glow-color); /* Use the brighter glow color for the heading */
-    margin-bottom: 1.5rem;
-    font-size: 1.75rem;
-    text-shadow: 0 0 10px var(--primary-color); /* Subtle text glow */
+        0 4px 15px rgba(0, 0, 0, 0.4),
+        0 0 30px var(--glow-color);
+    transition: all 0.3s ease;
 }
 
 #auth-container:hover {
     box-shadow: 
         0 6px 20px rgba(0, 0, 0, 0.5),
-        0 0 40px var(--glow-color); /* Stronger glow on hover */
+        0 0 40px var(--glow-color);
+}
+
+#auth-container h2 {
+    text-align: center;
+    color: var(--glow-color);
+    margin-bottom: 1.5rem;
+    font-size: 1.75rem;
+    text-shadow: 0 0 10px var(--primary-color);
 }
 
 .auth-form-group {
@@ -149,14 +146,14 @@ body {
     border-radius: 8px;
     color: var(--text-light);
     font-size: 1rem;
-    transition: border-color 0.2s, box-shadow 0.2s; /* Add shadow transition */
+    transition: border-color 0.2s, box-shadow 0.2s;
 }
 
 .auth-input:focus {
     outline: none;
     border-color: var(--primary-color);
-    box-shadow: 0 0 15px var(--primary-color), /* Primary glow on focus */
-                inset 0 0 5px var(--primary-color); /* Inner glow */
+    box-shadow: 0 0 15px var(--primary-color),
+                inset 0 0 5px var(--primary-color);
 }
 
 .auth-button {
@@ -170,13 +167,13 @@ body {
     font-weight: 600;
     cursor: pointer;
     transition: background-color 0.2s, box-shadow 0.2s;
-    box-shadow: 0 0 10px rgba(192, 0, 192, 0.5); /* Initial button glow */
+    box-shadow: 0 0 10px rgba(var(--primary-color-rgb), 0.5);
 }
 
 .auth-button:hover {
-    background-color: #a000a0; /* Slightly darker purple on hover */
-    box-shadow: 0 0 20px rgba(192, 0, 192, 0.8), /* Stronger glow on hover */
-                0 0 5px rgba(255, 255, 255, 0.3) inset; /* Subtle inner highlight */
+    background-color: var(--primary-color-dark);
+    box-shadow: 0 0 20px rgba(var(--primary-color-rgb), 0.8),
+                0 0 5px rgba(255, 255, 255, 0.3) inset;
 }
 
 .auth-toggle {
@@ -188,7 +185,7 @@ body {
 .auth-toggle-btn {
     background: none;
     border: none;
-    color: var(--glow-color); /* Use glow color for toggle link */
+    color: var(--glow-color);
     cursor: pointer;
     font-weight: 600;
     font-size: 0.9rem;
@@ -196,67 +193,63 @@ body {
 }
 
 .auth-toggle-btn:hover {
-    text-shadow: 0 0 8px var(--glow-color); /* Glow on toggle link hover */
+    text-shadow: 0 0 8px var(--glow-color);
 }
 
 .auth-error {
-    color: #c00000; /* Error red */
+    color: var(--error-color);
     text-align: center;
     margin-top: 1rem;
     font-size: 0.9rem;
-    display: none; /* Hidden by default */
+    display: none;
 }
 
-/* --- Helper classes --- */
 .hidden {
     display: none !important;
 }
 
-/* --- Password Field Styles --- */
 .password-group {
-    position: relative; /* This is the anchor for the absolute button */
+    position: relative;
 }
 
 .password-group .auth-input {
-    padding-right: 45px; /* Add padding to the right to make space for the button */
+    padding-right: 45px; 
 }
 
 .password-toggle-btn {
     position: absolute;
-    top: 45px; /* Adjust this number if it's not centered */
+    top: 45px;
     transform: translateY(-50%);
     right: 10px;
     background: none;
     border: none;
     color: var(--text-muted);
     cursor: pointer;
-    font-size: 1.25rem; /* Makes the 👁️ icon a good size */
+    font-size: 1.25rem;
     padding: 0 5px;
-    z-index: 10; /* Ensures it's on top of the input */
+    z-index: 10;
 }
 
 .password-toggle-btn:hover {
     color: var(--text-light);
 }
-/* --- End Password Field Styles --- */
 
-/* --- Main App Layout --- */
 .chat-app {
     display: flex;
     height: 100vh;
     width: 100%;
-    transition: filter 0.3s ease; /* Smooth transition when auth overlay hides/shows */
+    transition: filter 0.3s ease;
 }
 
 body.auth-visible .chat-app {
-    filter: blur(5px); /* Apply blur */
-    pointer-events: none; /* Prevent interaction with blurred app */
+    filter: blur(5px);
+    pointer-events: none;
 }
 
 #auth-overlay.hidden {
     opacity: 0;
     visibility: hidden;
-    pointer-events: none; /* Crucial to allow clicks through when hidden */
+    pointer-events: none;
 }
 
 .icon-nav {
@@ -267,10 +260,13 @@ body.auth-visible .chat-app {
     flex-direction: column;
     align-items: center;
     flex-shrink: 0;
+    border-right: 1px solid var(--border-color);
 }
 
 .icon-nav ul {
     list-style: none;
+    padding: 0;
+    margin: 0;
 }
 
 .icon-nav li {
@@ -293,7 +289,7 @@ body.auth-visible .chat-app {
 
 .contacts-panel {
     width: 300px;
-    background-color: var(--bg-dark);
+    background-color: var(--bg-medium);
     border-right: 1px solid var(--border-color);
     display: flex;
     flex-direction: column;
@@ -307,6 +303,7 @@ body.auth-visible .chat-app {
     padding: 1rem;
     background-color: var(--primary-color);
     flex-shrink: 0;
+    border-bottom: 1px solid var(--primary-color-dark);
 }
 
 .contacts-panel h2 {
@@ -314,148 +311,139 @@ body.auth-visible .chat-app {
     font-weight: 600;
 }
 
-.contacts-panel header span {
-    font-size: 1.25rem;
-    cursor: pointer;
+#user-info {
+    padding: 1rem;
+    background-color: var(--bg-dark);
+    border-bottom: 1px solid var(--border-color);
 }
-/* --- End Main App Layout --- */
+#user-info p {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin-bottom: 0.25rem;
+}
+#user-info strong {
+    color: var(--text-light);
+    font-weight: 600;
+    font-size: 0.9rem;
+    word-break: break-all;
+}
 
-/* --- Contacts List Panel --- */
 .contacts-list {
     list-style: none;
-    padding: 0; /* Remove default padding */
-    margin: 0; /* Remove default margin */
-    overflow-y: auto;
+    padding: 0;
+    margin: 0;
     flex-grow: 1;
+    overflow-y: auto;
 }
 
-/* NEW: Custom scrollbar for the contacts list */
 .contacts-list::-webkit-scrollbar {
     width: 6px;
 }
+
 .contacts-list::-webkit-scrollbar-track {
-    background: var(--bg-dark);
+    background: var(--bg-medium);
 }
+
 .contacts-list::-webkit-scrollbar-thumb {
-    background: #a000a0; /* Darker purple */
+    background: var(--bg-light-hover);
     border-radius: 3px;
 }
 
-/* NEW: This styles the <li> we create in JavaScript */
 .contact-item {
     display: flex;
     align-items: center;
-    padding: 0.75rem 1rem; /* 12px 16px */
+    padding: 0.75rem 1rem;
     border-bottom: 1px solid var(--border-color);
     cursor: pointer;
     transition: background-color 0.2s ease, box-shadow 0.2s ease;
-    gap: 15px; /* Space between avatar and info */
+    gap: 15px;
 }
 
 .contact-item:last-child {
-    border-bottom: none; /* No border on the last item */
+    border-bottom: none;
 }
 
 .contact-item:hover {
-    background-color: #2a002a; /* Same as your old hover */
+    background-color: var(--bg-light-hover);
 }
 
-/* NEW: This class will be added by JS on click */
 .contact-item.selected {
     background-color: var(--primary-color);
-    box-shadow: 0 0 15px rgba(192, 0, 192, 0.5); /* Glow effect */
+    color: var(--text-light);
 }
 
-/* NEW: Placeholder for empty list */
 .chat-list-empty {
-    padding: 1.5rem;
+    padding: 2rem 1rem;
     text-align: center;
     color: var(--text-muted);
     font-size: 0.9rem;
 }
 
-/* This is your existing avatar style, with new styles added */
 .avatar {
-    width: 45px; /* Slightly larger */
+    width: 45px;
     height: 45px;
-    background-color: var(--primary-color);
     border-radius: 50%;
-    margin-right: 0; /* We use 'gap' in the parent now */
-    flex-shrink: 0;
-    /* NEW: Flex properties to center the initial */
+    background-color: var(--primary-color-dark);
     display: flex;
     justify-content: center;
     align-items: center;
-    font-size: 1.2rem;
+    font-size: 1.2em;
     font-weight: bold;
     color: var(--text-light);
-    box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+    flex-shrink: 0;
     text-transform: uppercase;
 }
-.avatar span { /* This is the <span> with the letter */
-    line-height: 1; 
-}
-
 
 .contact-info {
     flex-grow: 1;
     overflow: hidden;
-    white-space: nowrap;
 }
 
 .contact-info strong {
     display: block;
-    font-weight: 600;
-    color: var(--text-light); /* Make sure text is light */
-    font-size: 1rem; /* Reset font size */
+    font-size: 1em;
+    font-weight: 500;
+    color: var(--text-color);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
-/* NEW: Style for the subtext */
 .contact-info small {
     display: block;
-    font-size: 0.85rem;
+    font-size: 0.85em;
     color: var(--text-muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
-/* Make text light when its parent is selected */
 .contact-item.selected .contact-info strong,
 .contact-item.selected .contact-info small {
     color: var(--text-light);
 }
 
-.contacts-list time {
-    font-size: 0.75rem;
-    color: var(--text-muted);
-    flex-shrink: 0;
-    margin-left: 0.5rem;
-}
-/* --- End Contacts List Panel --- */
-
-/* --- Chat Panel --- */
 .chat-panel {
     flex-grow: 1;
     display: flex;
     flex-direction: column;
-    background-color: var(--bg-medium);
+    background-color: var(--bg-dark);
 }
 
-/* NEW: Placeholder for when no chat is selected */
 #chat-placeholder {
     flex-grow: 1;
-    display: flex; /* Show by default */
+    display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
     text-align: center;
     color: var(--text-muted);
     padding: 2rem;
-    background-image: radial-gradient(var(--bg-pattern) 1px, transparent 1px);
-    background-size: 20px 20px;
 }
 #chat-placeholder i {
     font-size: 4rem;
     margin-bottom: 1.5rem;
-    opacity: 0.5;
+    opacity: 0.3;
 }
 #chat-placeholder p {
     font-size: 1.25rem;
@@ -468,29 +456,30 @@ body.auth-visible .chat-app {
     line-height: 1.5;
 }
 
-/* NEW: Chat window container */
 #chat-window {
     flex-grow: 1;
-    display: none; /* Hide by default */
+    display: none;
     flex-direction: column;
+    width: 100%;
+    height: 100%;
 }
 
-/* NEW: This class will be added by JS to show the chat */
 #chat-window.active {
     display: flex;
 }
-
 
 .chat-panel header {
     display: flex;
     align-items: center;
     padding: 0.75rem 1rem;
-    background-color: var(--primary-color);
+    background-color: var(--bg-medium);
     flex-shrink: 0;
+    border-bottom: 1px solid var(--border-color);
+    gap: 15px;
 }
 
 .chat-panel header strong {
-    margin-left: 0.75rem;
+    margin-left: 0;
     flex-grow: 1;
     font-size: 1.1rem;
     font-weight: 600;
@@ -536,8 +525,6 @@ body.auth-visible .chat-app {
     min-width: 150px;
     padding: 0.5rem 0;
     z-index: 10;
-
-    /* Styles for smooth transition */
     opacity: 0;
     visibility: hidden;
     transform: translateY(-10px) scale(0.95);
@@ -553,6 +540,8 @@ body.auth-visible .chat-app {
 
 .dropdown-menu ul {
     list-style: none;
+    padding: 0;
+    margin: 0;
 }
 
 .dropdown-menu .dropdown-item {
@@ -578,8 +567,6 @@ body.auth-visible .chat-app {
     display: flex;
     flex-direction: column;
     gap: 0.75rem;
-    background-image: radial-gradient(var(--bg-pattern) 1px, transparent 1px);
-    background-size: 20px 20px;
 }
 
 .messages-area .chat-list-empty {
@@ -587,125 +574,122 @@ body.auth-visible .chat-app {
     text-align: center;
     color: var(--text-muted);
     font-size: 0.9rem;
-    margin-top: auto; /* Pushes the message to the top */
-    margin-bottom: auto; /* Pushes the message to the bottom */
-    /* This centers it vertically */
+    margin-top: auto;
+    margin-bottom: auto;
 }
-/* --- End Chat Panel --- */
 
-/* --- Chat Messages --- */
+
 .message {
     max-width: 60%;
     width: fit-content;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
 }
 
 .message p {
     padding: 0.75rem 1rem;
     border-radius: 18px;
     line-height: 1.4;
+    color: var(--text-light);
+}
+
+.message time {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    padding: 0 0.5rem;
 }
 
 .message.received {
     align-self: flex-start;
 }
-
 .message.received p {
     background-color: var(--bubble-received);
     border-bottom-left-radius: 4px;
+}
+.message.received time {
+    align-self: flex-start;
 }
 
 .message.sent {
     align-self: flex-end;
 }
-
 .message.sent p {
     background-color: var(--bubble-sent);
     border-bottom-right-radius: 4px;
 }
-/* --- End Chat Messages --- */
+.message.sent time {
+    align-self: flex-end;
+}
 
-/* --- Chat Footer/Input --- */
 .chat-panel footer {
     display: flex;
     align-items: center;
     padding: 0.75rem 1rem;
-    background-color: var(--primary-color);
+    background-color: var(--bg-medium);
     flex-shrink: 0;
-    gap: 0.75rem; /* Add space between buttons and form */
+    gap: 0.75rem;
+    border-top: 1px solid var(--border-color);
 }
 
 .chat-panel footer button {
     background: none;
     border: none;
-    color: var(--text-light);
+    color: var(--text-muted);
     font-size: 1.5rem;
     cursor: pointer;
-    flex-shrink: 0; /* Stop buttons from shrinking */
+    flex-shrink: 0;
+    transition: color 0.2s;
+}
+.chat-panel footer button:hover {
+    color: var(--text-light);
 }
 
-/* --- THIS IS THE NEW, IMPORTANT PART --- */
 #message-form {
-    display: flex; /* Make the form a flex container */
-    flex-grow: 1; /* Tell the form to take all available space */
+    display: flex;
+    flex-grow: 1;
     align-items: center;
     background-color: var(--bg-dark);
-    border-radius: 20px; /* Move the rounded corners to the form */
+    border-radius: 20px;
+    border: 1px solid var(--border-color);
 }
 
 #message-form input {
-    flex-grow: 1; /* Tell the input to take all space *inside* the form */
-    background: transparent; /* Make the input transparent */
+    flex-grow: 1;
+    background: transparent;
     border: none;
     padding: 0.75rem 1rem;
     color: var(--text-light);
     font-size: 1rem;
-    outline: none; /* No outline on focus */
+    outline: none;
 }
-
-#message-form button {
-    margin-right: 0.5rem; /* Space for the send button */
-    padding: 0.5rem; /* Make it easier to click */
-}
-
 #message-form input::placeholder {
     color: var(--text-muted);
 }
-/* --- END OF CHAT FOOTER INPUT --- */
 
-/* --- New User Info --- */
-#user-info {
-    padding: 1rem;
-    background-color: var(--bg-medium);
-    border-bottom: 1px solid var(--border-color);
+#message-form button {
+    margin-right: 0.5rem;
+    padding: 0.5rem;
+    color: var(--primary-color);
 }
-#user-info p {
-    font-size: 0.8rem;
-    color: var(--text-muted);
-    margin-bottom: 0.25rem;
-}
-#user-info strong {
-    color: var(--text-light);
-    font-weight: 600;
-    font-size: 0.9rem;
-    word-break: break-all; /* This helps if the email is very long */
+#message-form button:hover {
+    color: var(--primary-color-dark);
 }
 
-/* --- Style for the new '+' button in the contacts header --- */
 .contacts-header-btn {
     background: none;
     border: none;
     color: var(--text-light);
-    font-size: 1.25rem; /* Make the icon a good size */
+    font-size: 1.25rem;
     cursor: pointer;
     opacity: 0.8;
     transition: opacity 0.2s;
-    padding: 0.25rem; /* Add some clickable area */
+    padding: 0.25rem;
 }
 .contacts-header-btn:hover {
     opacity: 1;
 }
 
-/* --- Modal Styles (for New Chat & Logout) --- */
 .modal-overlay {
     position: fixed;
     top: 0;
@@ -717,16 +701,14 @@ body.auth-visible .chat-app {
     display: flex;
     justify-content: center;
     align-items: center;
-    z-index: 200; /* High z-index to be on top */
-    
-    /* Hide it by default */
+    z-index: 200;
     opacity: 0;
     visibility: hidden;
     pointer-events: none;
     transition: opacity 0.3s ease, visibility 0.3s ease;
 }
 
-.modal-overlay.show { /* We will add this 'show' class with JavaScript to display the modal */
+.modal-overlay.show {
     opacity: 1;
     visibility: visible;
     pointer-events: all;
@@ -738,10 +720,9 @@ body.auth-visible .chat-app {
     border-radius: 12px;
     border: 1px solid var(--border-color);
     width: 100%;
-    max-width: 450px; /* A good width for this modal */
+    max-width: 450px;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-    
-    transform: scale(0.95); /* A subtle "pop-in" animation */
+    transform: scale(0.95);
     transition: transform 0.3s ease;
 }
 .modal-overlay.show .modal-content {
@@ -803,17 +784,17 @@ body.auth-visible .chat-app {
 }
 
 .modal-error {
-    color: var(--error-color); /* We defined this in auth styles */
+    color: var(--error-color);
     font-size: 0.9rem;
     margin-top: -0.5rem;
     margin-bottom: 1.25rem;
-    display: none; /* Hidden by default */
+    display: none;
 }
 
 .modal-actions {
     display: flex;
     justify-content: flex-end;
-    gap: 0.75rem; /* Space between buttons */
+    gap: 0.75rem;
     margin-top: 2rem;
 }
 .modal-btn {
@@ -830,7 +811,7 @@ body.auth-visible .chat-app {
     color: var(--text-light);
 }
 .modal-btn.primary:hover {
-    background-color: #a000a0; /* Darker purple */
+    background-color: var(--primary-color-dark);
     box-shadow: 0 0 10px var(--primary-color);
 }
 .modal-btn.secondary {
@@ -844,35 +825,28 @@ body.auth-visible .chat-app {
 }
 
 .modal-btn.primary-danger {
-    background-color: var(--error-color); /* We defined this red color earlier */
+    background-color: var(--error-color);
     color: var(--text-light);
 }
 .modal-btn.primary-danger:hover {
-    background-color: #a00000; /* A darker red on hover */
+    background-color: var(--error-color-dark);
     box-shadow: 0 0 10px var(--error-color);
 }
-/* --- End Modal Styles --- */
 
-/* --- START: Verify OTP Modal Styles --- */
-
-/* Style for the email address display inside the modal */
 #otp-email-display {
-    color: var(--text-light); /* Make the email stand out */
+    color: var(--text-light);
     font-weight: 600;
-    word-break: break-all; /* In case it's a long email */
+    word-break: break-all;
 }
 
-/* Style for the 6-digit OTP input */
 #otp-input {
-    font-size: 1.5rem; /* Make the text bigger */
-    text-align: center; /* Center the 6 digits */
-    letter-spacing: 0.5rem; /* Space out the numbers */
+    font-size: 1.5rem;
+    text-align: center;
+    letter-spacing: 0.5rem;
     font-weight: 600;
-    color: var(--glow-color); /* Make the numbers purple */
+    color: var(--glow-color);
 }
 
-/* Style for the 'Resend Code' button */
 #resend-otp-btn {
-    width: 100%; /* Make it full-width like the main buttons */
+    width: 100%;
 }
-/* --- END: Verify OTP Modal Styles --- */
