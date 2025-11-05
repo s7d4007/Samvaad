@@ -18,52 +18,78 @@
         <p>Loading...</p>
     </div>
 
+    <!-- --- START: NEW Auth Overlay (Sliding) --- -->
     <div id="auth-overlay">
-        <div id="auth-container">
-            <!-- Login Form -->
-            <form id="login-form">
-                <h2>Login</h2>
-                <div class="auth-form-group">
-                    <label for="login-email">Email</label>
-                    <input type="email" id="login-email" class="auth-input" required>
-                </div>
-                <div class="auth-form-group password-group">
-                    <label for="login-password">Password</label>
-                    <input type="password" id="login-password" class="auth-input" required>
-                    <button type="button" class="password-toggle-btn" id="toggle-login-password"><i
-                            class="fa-solid fa-eye"></i></button>
-                </div>
-                <button type="submit" class="auth-button">Login</button>
-                <p class="auth-error" id="login-error"></p>
-                <p class="auth-toggle">
-                    Don't have an account? <button type="button" id="show-signup-btn" class="auth-toggle-btn">Sign
-                        Up</button>
-                </p>
-            </form>
+        <div class="auth-container" id="auth-container">
 
-            <!-- Signup Form (hidden by default) -->
-            <form id="signup-form" style="display: none;">
-                <h2>Sign Up</h2>
-                <div class="auth-form-group">
-                    <label for="signup-email">Email</label>
-                    <input type="email" id="signup-email" class="auth-input" required>
+            <!-- SIGN-UP FORM CONTAINER -->
+            <div class="form-container sign-up-container">
+                <form id="signup-form">
+                    <h1>Create Account</h1>
+                    <div class="auth-form-group">
+                        <label for="signup-email">Email</label>
+                        <input type="email" id="signup-email" class="auth-input" required>
+                    </div>
+                    <div class="auth-form-group password-group">
+                        <label for="signup-password">Password</label>
+                        <input type="password" id="signup-password" class="auth-input" required>
+                        <button type="button" class="password-toggle-btn" id="toggle-signup-password">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                    <button type="submit" class="auth-button">Sign Up</button>
+                    <p class="auth-error" id="signup-error"></p>
+                </form>
+            </div>
+
+            <!-- LOGIN FORM CONTAINER -->
+            <div class="form-container login-container">
+                <form id="login-form">
+                    <h1>Login</h1>
+                    <div class="auth-form-group">
+                        <label for="login-email">Email</label>
+                        <input type="email" id="login-email" class="auth-input" required>
+                    </div>
+                    <div class="auth-form-group password-group">
+                        <label for="login-password">Password</label>
+                        <input type="password" id="login-password" class="auth-input" required>
+                        <button type="button" class="password-toggle-btn" id="toggle-login-password">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                    <button type="submit" class="auth-button">Login</button>
+                    <p class="auth-error" id="login-error"></p>
+                </form>
+            </div>
+
+            <!-- THE SLIDING OVERLAY CONTAINER -->
+            <div class="overlay-container">
+                <div class="overlay">
+                    <!-- This panel shows on the LEFT (when login is visible) -->
+                    <div class="overlay-panel overlay-left">
+                        <h1>Welcome Back</h1>
+                        <p>Don't have an account? Enter your details to start your journey.</p>
+                        <button class="ghost-button" id="show-signup-btn">Sign Up</button>
+                    </div>
+
+                    <!-- This panel shows on the RIGHT (when signup is visible) -->
+                    <div class="overlay-panel overlay-right">
+                        <h1>Hello !!</h1>
+                        <p>Already have an account? Please login to connect.</p>
+                        <!-- Logo Placeholder -->
+                        <div class="logo-placeholder">
+                            <i class="fas fa-comments"></i>
+                            <span>My Logo</span>
+                        </div>
+
+                        <button class="ghost-button" id="show-login-btn">Login</button>
+                    </div>
                 </div>
-                <div class="auth-form-group password-group">
-                    <label for="signup-password">Password (min. 6 characters)</label>
-                    <input type="password" id="signup-password" class="auth-input" required>
-                    <button type="button" class="password-toggle-btn" id="toggle-signup-password"><i
-                            class="fa-solid fa-eye"></i></button>
-                </div>
-                <button type="submit" class="auth-button">Sign Up</button>
-                <p class="auth-error" id="signup-error"></p>
-                <p class="auth-toggle">
-                    Already have an account? <button type="button" id="show-login-btn"
-                        class="auth-toggle-btn">Login</button>
-                </p>
-            </form>
+            </div>
+
         </div>
     </div>
-    <!-- --- END: Auth Overlay --- -->
+    <!-- --- END: Auth Overlay (Sliding) --- -->
 
     <main class="chat-app">
         <nav class="icon-nav">

@@ -20,6 +20,7 @@ const showLoginBtn = document.getElementById('show-login-btn');
 const loginError = document.getElementById('login-error');
 const signupError = document.getElementById('signup-error');
 const chatApp = document.querySelector('.chat-app');
+const authContainer = document.getElementById('auth-container');
 
 // Auth password toggle elements
 const loginPasswordInput = document.getElementById('login-password');
@@ -68,18 +69,28 @@ const otpInput = document.getElementById('otp-input');
 const otpError = document.getElementById('otp-error');
 const resendOtpBtn = document.getElementById('resend-otp-btn');
 
+
 // --- STEP 3: HANDLE AUTH LOGIC ---
 
-// Toggle between login and signup forms
-showSignupBtn.addEventListener('click', () => {
-    loginForm.style.display = 'none';
-    signupForm.style.display = 'block';
+// --- START:  Sliding Panel Toggle Logic ---
+showLoginBtn.addEventListener('click', () => {
+    authContainer.classList.add('right-panel-active');
+
+    // Clear the other form
+    signupForm.reset();
+    signupError.textContent = '';
+    signupError.style.display = 'none';
 });
 
-showLoginBtn.addEventListener('click', () => {
-    loginForm.style.display = 'block';
-    signupForm.style.display = 'none';
+showSignupBtn.addEventListener('click', () => {
+    authContainer.classList.remove('right-panel-active');
+
+    // Clear the other form
+    loginForm.reset();
+    loginError.textContent = '';
+    loginError.style.display = 'none';
 });
+// --- END: Sliding Panel Toggle Logic ---
 
 // Helper function to toggle password visibility
 const togglePassword = (input, button) => {
