@@ -73,6 +73,11 @@ const resendOtpBtn = document.getElementById('resend-otp-btn');
 const mainNav = document.getElementById('main-nav');
 const navToggleBtn = document.getElementById('nav-toggle-btn');
 
+// Views
+const chatsView = document.getElementById('chats-view');
+const profileView = document.getElementById('profile-view');
+const settingsView = document.getElementById('settings-view');
+
 // --- STEP 3: HANDLE AUTH LOGIC ---
 
 // --- START:  Sliding Panel Toggle Logic ---
@@ -123,10 +128,34 @@ mainNav.addEventListener('click', (e) => {
     // 2. Add the 'active' class to the <li> we just clicked
     clickedLi.classList.add('active');
 
-    // 3. (Future step) This is where we will load the new "view"
-    // const view = clickedButton.dataset.view;
-    // console.log(`Switching to view: ${view}`);
+    // 3. Get the view name from the button's 'data-view' attribute
+    const view = clickedButton.dataset.view;
+    if (view) {
+        // Call our helper function to show the correct view
+        showView(view + '-view'); // e.g., 'profile' + '-view' = 'profile-view'
+        console.log(`Switched to view: ${view}`);
+    }
 });
+
+// --- START: View Switching Logic ---
+
+function showView(viewId) {
+    // First, hide all the main views
+    chatsView.style.display = 'none';
+    profileView.style.display = 'none';
+    settingsView.style.display = 'none';
+
+    const viewToShow = document.getElementById(viewId);
+    if (viewToShow) {
+        viewToShow.style.display = 'flex';
+    } else {
+        console.error(`View not found: ${viewId}`);
+        // Fallback: show the chats view if something went wrong
+        chatsView.style.display = 'flex';
+    }
+}
+
+// --- END: View Switching Logic ---
 
 // Helper function to toggle password visibility
 const togglePassword = (input, button) => {

@@ -6,7 +6,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Samvaad</title>
     <link rel="stylesheet" href="styles.css">
-    <script src="script.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://kit.fontawesome.com/dda2710b56.js" crossorigin="anonymous"></script>
 </head>
@@ -18,11 +17,9 @@
         <p>Loading...</p>
     </div>
 
-    <!-- --- START: NEW Auth Overlay (Sliding) --- -->
     <div id="auth-overlay">
         <div class="auth-container" id="auth-container">
 
-            <!-- SIGN-UP FORM CONTAINER -->
             <div class="form-container sign-up-container">
                 <form id="signup-form">
                     <h1>Create Account</h1>
@@ -42,7 +39,6 @@
                 </form>
             </div>
 
-            <!-- LOGIN FORM CONTAINER -->
             <div class="form-container login-container">
                 <form id="login-form">
                     <h1>Login</h1>
@@ -62,21 +58,17 @@
                 </form>
             </div>
 
-            <!-- THE SLIDING OVERLAY CONTAINER -->
             <div class="overlay-container">
                 <div class="overlay">
-                    <!-- This panel shows on the LEFT (when login is visible) -->
                     <div class="overlay-panel overlay-left">
-                        <h1>Welcome Back</h1>
+                        <h1>Hello, Friend!</h1>
                         <p>Don't have an account? Enter your details to start your journey.</p>
                         <button class="ghost-button" id="show-signup-btn">Sign Up</button>
                     </div>
 
-                    <!-- This panel shows on the RIGHT (when signup is visible) -->
                     <div class="overlay-panel overlay-right">
-                        <h1>Hello !!</h1>
+                        <h1>Welcome Back!</h1>
                         <p>Already have an account? Please login to connect.</p>
-                        <!-- Logo Placeholder -->
                         <div class="logo-placeholder">
                             <i class="fas fa-comments"></i>
                             <span>My Logo</span>
@@ -89,8 +81,6 @@
 
         </div>
     </div>
-    <!-- --- END: Auth Overlay (Sliding) --- -->
-
     <main class="chat-app">
         <nav class="icon-nav" id="main-nav">
             <ul>
@@ -131,81 +121,101 @@
                 </li>
             </ul>
         </nav>
-        <aside class="contacts-panel">
-            <header>
-                <h2>Chats</h2>
-                <span><i class="fa-regular fa-star"></i></span>
-            </header>
 
-            <div id="user-info">
-                <p>You are logged in as:</p>
-                <strong id="user-email-display">...loading...</strong>
-            </div>
+        <div class="main-content-container">
 
-            <button title="New Chat" id="new-chat-btn" class="contacts-header-btn" disabled>
-                <i class="fas fa-plus"></i>
-            </button>
+            <div id="chats-view" class="main-view">
 
-            <ul class="contacts-list" id="contacts-list">
-
-            </ul>
-        </aside>
-
-        <section class="chat-panel">
-
-            <!-- 1. The Placeholder (visible by default) -->
-            <div id="chat-placeholder">
-                <i class="fas fa-comments"></i>
-                <p>Select a chat</p>
-                <small>Click on a contact from the list to see your messages.</small>
-            </div>
-
-            <!-- 2. The Chat Window (hidden by default) -->
-            <div id="chat-window">
-                <header>
-                    <figure class="avatar" id="chat-header-avatar">
-                        <!-- Avatar initial will go here -->
-                    </figure>
-                    <strong id="chat-header-name">...</strong>
-                    <div class="chat-controls">
-                        <span class="search-icon"><i class="fas fa-search"></i></span>
-                        <div class="dropdown-container">
-                            <button class="dropdown-toggle" title="More options">
-                                <i class="fas fa-ellipsis-v"></i>
-                            </button>
-                            <div class="dropdown-menu">
-                                <ul>
-                                    <li><button class="dropdown-item" id="clear-chat-btn">Clear chat</button></li>
-                                    <li><button class="dropdown-item" id="export-chat-btn">Export chat</button></li>
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-                </header>
-
-                <main class="messages-area" id="messages-area">
-                    <!-- Messages will be loaded here by JavaScript -->
-                </main>
-
-                <footer>
-                    <button title="Attachments">
-                        <i class="fas fa-paperclip"></i>
-                    </button>
-                    <form id="message-form">
-                        <input type="text" id="message-input" placeholder="Type a message..." autocomplete="off"
-                            disabled>
-                        <button type="submit" title="Send Message" disabled>
-                            <i class="fas fa-paper-plane"></i>
+                <aside class="contacts-panel">
+                    <header>
+                        <h2>Chats</h2>
+                        <button title="New Chat" id="new-chat-btn" class="contacts-header-btn" disabled>
+                            <i class="fas fa-plus"></i>
                         </button>
-                    </form>
-                </footer>
+                    </header>
+
+                    <div id="user-info">
+                        <p>You are logged in as:</p>
+                        <strong id="user-email-display">...loading...</strong>
+                    </div>
+
+                    <ul class="contacts-list" id="contacts-list">
+                    </ul>
+                </aside>
+
+                <section class="chat-panel">
+
+                    <div id="chat-placeholder">
+                        <i class="fas fa-comments"></i>
+                        <p>Select a chat</p>
+                        <small>Click on a contact from the list to see your messages.</small>
+                    </div>
+
+                    <div id="chat-window">
+                        <header>
+                            <figure class="avatar" id="chat-header-avatar">
+                            </figure>
+                            <strong id="chat-header-name">...</strong>
+                            <div class="chat-controls">
+                                <span class="search-icon"><i class="fas fa-search"></i></span>
+                                <div class="dropdown-container">
+                                    <button class="dropdown-toggle" title="More options">
+                                        <i class="fas fa-ellipsis-v"></i>
+                                    </button>
+                                    <div class="dropdown-menu">
+                                        <ul>
+                                            <li><button class="dropdown-item" id="clear-chat-btn">Clear chat</button>
+                                            </li>
+                                            <li><button class="dropdown-item" id="export-chat-btn">Export chat</button>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </header>
+
+                        <main class="messages-area" id="messages-area">
+                        </main>
+
+                        <footer>
+                            <button title="Attachments">
+                                <i class="fas fa-paperclip"></i>
+                            </button>
+                            <form id="message-form">
+                                <input type="text" id="message-input" placeholder="Type a message..." autocomplete="off"
+                                    disabled>
+                                <button type="submit" title="Send Message" disabled>
+                                    <i class="fas fa-paper-plane"></i>
+                                </button>
+                            </form>
+                        </footer>
+                    </div>
+
+                </section>
             </div>
 
-        </section>
+            <div id="profile-view" class="main-view" style="display: none;">
+                <div class="view-header">
+                    <h1>Profile</h1>
+                </div>
+                <div class="view-content">
+                    <p>Profile Settings. <br>Coming Soon...</p>
+                </div>
+            </div>
+
+            <div id="settings-view" class="main-view" style="display: none;">
+                <div class="view-header">
+                    <h1>Settings <br>Coming Soon...</h1>
+                </div>
+                <div class="view-content">
+                    <p>App settings</p>
+                </div>
+            </div>
+
+        </div>
 
     </main>
 
-    <!-- --- START: New Chat Modal --- -->
     <div id="new-chat-modal" class="modal-overlay">
         <div class="modal-content">
             <div class="modal-header">
@@ -231,8 +241,6 @@
             </form>
         </div>
     </div>
-    <!-- --- END: New Chat Modal --- -->
-    <!-- --- START: Confirm Logout Modal --- -->
     <div id="confirm-logout-modal" class="modal-overlay">
         <div class="modal-content">
             <div class="modal-header">
@@ -250,9 +258,6 @@
             </div>
         </div>
     </div>
-    <!-- --- END: Confirm Logout Modal --- -->
-
-    <!-- --- START: NEW Verify Email Modal --- -->
     <div id="verify-otp-modal" class="modal-overlay">
         <div class="modal-content">
             <div class="modal-header">
@@ -285,8 +290,6 @@
             </form>
         </div>
     </div>
-    <!-- --- END: NEW Verify Email Modal --- -->
-
     <script src="config.js"></script>
     <script type="module" src="app.js"></script>
 </body>
