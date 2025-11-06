@@ -140,22 +140,29 @@ mainNav.addEventListener('click', (e) => {
 
 // --- START: View Switching Logic ---
 
-function showView(viewId) {
-    // First, hide all the main views
-    chatsView.style.display = 'none';
-    profileView.style.display = 'none';
-    settingsView.style.display = 'none';
-    starView.style.display = 'none';
+// --- START: View Switching Logic ---
 
+function showView(viewId) {
+    // 1. Find the currently active view (the one with the class)
+    const currentView = document.querySelector('.main-view.view-active');
+    if (currentView) {
+        // Remove the class to make it fade out
+        currentView.classList.remove('view-active');
+    }
+
+    // 2. Find the new view I want to show
     const viewToShow = document.getElementById(viewId);
     if (viewToShow) {
-        viewToShow.style.display = 'flex';
+        // Add the class to make it fade in
+        viewToShow.classList.add('view-active');
     } else {
         console.error(`View not found: ${viewId}`);
         // Fallback: show the chats view if something went wrong
-        chatsView.style.display = 'flex';
+        chatsView.classList.add('view-active');
     }
 }
+
+// --- END: View Switching Logic ---
 
 // --- END: View Switching Logic ---
 
