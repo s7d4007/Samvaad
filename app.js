@@ -69,6 +69,9 @@ const otpInput = document.getElementById('otp-input');
 const otpError = document.getElementById('otp-error');
 const resendOtpBtn = document.getElementById('resend-otp-btn');
 
+//Sidebar Elements
+const mainNav = document.getElementById('main-nav');
+const navToggleBtn = document.getElementById('nav-toggle-btn');
 
 // --- STEP 3: HANDLE AUTH LOGIC ---
 
@@ -91,6 +94,39 @@ showSignupBtn.addEventListener('click', () => {
     loginError.style.display = 'none';
 });
 // --- END: Sliding Panel Toggle Logic ---
+
+// Sidebar Navigation Toggle
+
+navToggleBtn.addEventListener('click', () => {
+    mainNav.classList.toggle('nav-expanded');
+});
+
+// Handle highlighting the active nav item
+mainNav.addEventListener('click', (e) => {
+    // Find the button that was clicked
+    const clickedButton = e.target.closest('button');
+
+    // If the user didn't click a button, or clicked the toggle/logout, do nothing
+    if (!clickedButton || clickedButton.id === 'nav-toggle-btn' || clickedButton.id === 'sign-out-btn') {
+        return;
+    }
+
+    // Find the parent <li>
+    const clickedLi = clickedButton.parentElement;
+
+    // 1. Find the *currently* active <li>
+    const currentActive = mainNav.querySelector('li.active');
+    if (currentActive) {
+        currentActive.classList.remove('active');
+    }
+
+    // 2. Add the 'active' class to the <li> we just clicked
+    clickedLi.classList.add('active');
+
+    // 3. (Future step) This is where we will load the new "view"
+    // const view = clickedButton.dataset.view;
+    // console.log(`Switching to view: ${view}`);
+});
 
 // Helper function to toggle password visibility
 const togglePassword = (input, button) => {

@@ -357,108 +357,127 @@ body.auth-visible .chat-app {
 	pointer-events: none;
 }
 
-/* * --- Expandable Icon Navigation --- */
+/* --- Expandable Icon Navigation --- */
 
 .icon-nav {
-    width: 58px; /* Default collapsed width */
-    background-color: var(--bg-dark);
-    padding: 1rem 0;
-    display: flex;
-    flex-direction: column;
-    flex-shrink: 0;
-    border-right: 1px solid var(--border-color);
-    transition: width 0.3s ease-in-out;
-    overflow-x: hidden; /* Hide text when collapsed */
+	width: 60px;
+	background-color: var(--bg-dark);
+	padding: 1rem 0;
+	display: flex;
+	flex-direction: column;
+	flex-shrink: 0;
+	border-right: 1px solid var(--border-color);
+	transition: width 0.3s ease-in-out;
+	overflow-x: hidden;
 }
 
-/* This class will be added by JavaScript to expand the nav */
 .icon-nav.nav-expanded {
-    width: 250px;
+	width: 160px;
 }
 
 .icon-nav ul {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    height: 100%; /* Allow pushing logout to bottom */
+	list-style: none;
+	padding: 0;
+	margin: 0;
+	width: 100%;
+	display: flex;
+	flex-direction: column;
+	height: 100%;
 }
 
 .icon-nav li {
-    margin: 0.5rem 0;
-    border-radius: 8px; /* Rounded corners for the active item */
-    flex-shrink: 0; /* Prevent list items from shrinking */
+	margin: 0.5rem 0;
+	flex-shrink: 0;
 }
 
 .icon-nav .nav-toggle {
-    margin-bottom: 1.5rem; /* Space below the toggle button */
+	margin-bottom: 1.5rem;
 }
 
 .icon-nav button {
-    background: none;
-    border: none;
-    color: var(--text-light);
-    cursor: pointer;
-    opacity: 0.7;
-    transform: scale(1);
-    transition: opacity 0.2s, color 0.2s, transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), background-color 0.2s ease;
-    
-    /* Flex setup for icon and text */
-    display: flex;
-    align-items: center;
-    width: 100%;
-    padding: 0.75rem 0; /* Vertical padding */
-    font-size: 1rem; /* Controls the size of the nav-text */
-    font-weight: 500;
+	background: none;
+	border: none;
+	color: var(--text-light);
+	cursor: pointer;
+	opacity: 0.7;
+	transform: scale(1);
+	transition: opacity 0.2s, color 0.2s, transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+	display: flex;
+	align-items: center;
+	width: 100%;
+	height: 44px;
+	padding: 0;
+	font-size: 1rem;
+	font-weight: 500;
+	transform-origin: left center;
 }
 
-/* This container ensures icons are aligned in collapsed state */
+.icon-nav li:not(.active) button:hover i,
+.icon-nav li.active button i {
+    transform: none !important; /* icon stays fixed */
+}
+
 .icon-nav button i {
-    font-size: 1.5rem;
-    width: 100%;
-    text-align: center;
-    flex-shrink: 0; 
+	font-size: 1.5rem;
+	flex-shrink: 0;
+	min-width: 60px;
+	height: 44px;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	position: relative;
 }
 
-/* The text label for each icon */
+
 .icon-nav .nav-text {
-    opacity: 0;
-    visibility: hidden;
-    white-space: nowrap; /* Prevent text from wrapping */
-    transition: opacity 0.2s ease, visibility 0.2s ease;
+	opacity: 0;
+	visibility: hidden;
+	white-space: nowrap;
+	transform: translateX(-10px);
+	transition: opacity 0.2s ease, transform 0.25s ease, visibility 0.2s ease;
+	margin-left: 0.75rem;
 }
 
-/* Show the text when the nav is expanded */
 .icon-nav.nav-expanded .nav-text {
-    opacity: 1;
-    visibility: visible;
+	opacity: 1;
+	visibility: visible;
+	transform: translateX(0);
 }
 
-/* Hover effect for all buttons */
-.icon-nav button:hover {
-    opacity: 1;
-    color: var(--primary-color);
-    transform: scale(1.1);
-}
-
-/* Specific styling for the currently active item */
-.icon-nav li.active {
-    background-color: var(--bg-light-hover);
+.icon-nav li:not(.active) button:hover {
+	opacity: 1;
+	color: var(--primary-color);
+	transform: scale(1.1);
 }
 
 .icon-nav li.active button {
-    opacity: 1;
-    color: var(--primary-color);
-    transform: scale(1.1); /* Makes the active item larger */
-    font-weight: 600; /* Bolder text for active item */
+	opacity: 1;
+	color: var(--primary-color);
+	transform: scale(1.1);
+	font-weight: 600;
 }
 
-/* This pushes the last item (Logout) to the bottom */
-.icon-nav li:last-child {
-    margin-top: auto;
+.icon-nav li.active button i::after {
+	content: '';
+	position: absolute;
+	bottom: 0px;
+	left: 50%;
+	transform: translateX(-50%);
+	width: 24px;
+	height: 3px;
+	background-color: var(--primary-color);
+	border-radius: 2px;
 }
+
+.icon-nav li:last-child {
+	margin-top: auto;
+}
+
+.icon-nav.nav-expanded li:nth-child(1) .nav-text { transition-delay: 0.05s; }
+.icon-nav.nav-expanded li:nth-child(2) .nav-text { transition-delay: 0.10s; }
+.icon-nav.nav-expanded li:nth-child(3) .nav-text { transition-delay: 0.15s; }
+.icon-nav.nav-expanded li:nth-child(4) .nav-text { transition-delay: 0.20s; }
+.icon-nav.nav-expanded li:nth-child(5) .nav-text { transition-delay: 0.25s; }
 
 .contacts-panel {
 	width: 300px;
