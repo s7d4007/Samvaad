@@ -2,16 +2,16 @@
 	--primary-color: #007BFF;
 	--primary-color-rgb: 0, 123, 255;
 	--primary-color-dark: #0056b3;
-	
+
 	--bg-dark: #18191A;
 	--bg-medium: #242526;
 	--bg-light-hover: #3A3B3C;
-	
+
 	--border-color: #3A3B3C;
-	
+
 	--bubble-sent: #007BFF;
 	--bubble-received: #3E4042;
-	
+
 	--text-light: #E4E6EB;
 	--text-muted: #B0B3B8;
 	--text-color: #E4E6EB;
@@ -80,6 +80,7 @@ body {
 	from {
 		transform: rotate(0deg);
 	}
+
 	to {
 		transform: rotate(360deg);
 	}
@@ -106,7 +107,7 @@ body {
 	border-radius: 12px;
 	box-shadow: 0 14px 28px rgba(0, 0, 0, 0.25), 0 10px 10px rgba(0, 0, 0, 0.22);
 	position: relative;
-	overflow: hidden; 
+	overflow: hidden;
 	width: 100%;
 	max-width: 768px;
 	min-height: 520px;
@@ -132,6 +133,7 @@ body {
 	height: 100%;
 	transition: all 0.6s ease-in-out;
 }
+
 .form-container form {
 	background-color: var(--bg-medium);
 	display: flex;
@@ -148,6 +150,7 @@ body {
 	width: 50%;
 	z-index: 2;
 }
+
 .login-container {
 	left: 0;
 	width: 50%;
@@ -165,6 +168,7 @@ body {
 	transition: transform 0.6s ease-in-out;
 	z-index: 100;
 }
+
 .overlay {
 	background: var(--primary-color);
 	background: linear-gradient(to right, var(--primary-color-dark), var(--primary-color));
@@ -176,6 +180,7 @@ body {
 	transform: translateX(0);
 	transition: transform 0.6s ease-in-out;
 }
+
 .overlay-panel {
 	position: absolute;
 	top: 0;
@@ -190,13 +195,16 @@ body {
 	transform: translateX(0);
 	transition: transform 0.6s ease-in-out;
 }
+
 .overlay-left {
 	transform: translateX(-20%);
 }
+
 .overlay-right {
 	right: 0;
 	transform: translateX(0);
 }
+
 .logo-placeholder {
 	font-size: 2rem;
 	margin: 1.5rem 0;
@@ -205,9 +213,11 @@ body {
 	align-items: center;
 	gap: 0.5rem;
 }
+
 .logo-placeholder i {
 	font-size: 3rem;
 }
+
 .logo-placeholder span {
 	font-size: 1rem;
 	font-weight: 600;
@@ -217,6 +227,7 @@ body {
 	width: 100%;
 	margin-bottom: 0.5rem;
 }
+
 .auth-form-group label {
 	display: block;
 	margin-bottom: 0.25rem;
@@ -235,11 +246,13 @@ body {
 	border-radius: 8px;
 	color: var(--text-light);
 }
+
 .auth-input:focus {
 	outline: none;
 	border-color: var(--primary-color);
 	box-shadow: 0 0 10px var(--primary-color);
 }
+
 .auth-button {
 	border-radius: 20px;
 	border: 1px solid var(--primary-color);
@@ -254,9 +267,11 @@ body {
 	cursor: pointer;
 	margin-top: 1rem;
 }
+
 .auth-button:hover {
 	box-shadow: 0 0 15px var(--primary-color);
 }
+
 .auth-button:active {
 	transform: scale(0.95);
 }
@@ -274,6 +289,7 @@ body {
 	transition: transform 80ms ease-in;
 	cursor: pointer;
 }
+
 .ghost-button:active {
 	transform: scale(0.95);
 }
@@ -290,6 +306,7 @@ body {
 	position: relative;
 	width: 100%;
 }
+
 .password-toggle-btn {
 	position: absolute;
 	top: 42px;
@@ -308,31 +325,41 @@ body {
 	transform: translateX(100%);
 	opacity: 0;
 }
+
 .auth-container.right-panel-active .login-container {
 	transform: translateX(100%);
 	opacity: 1;
 	z-index: 5;
 	animation: show 0.6s;
 }
+
 @keyframes show {
-	0%, 49.99% {
+
+	0%,
+	49.99% {
 		opacity: 0;
 		z-index: 1;
 	}
-	50%, 100% {
+
+	50%,
+	100% {
 		opacity: 1;
 		z-index: 5;
 	}
 }
+
 .auth-container.right-panel-active .overlay-container {
 	transform: translateX(-100%);
 }
+
 .auth-container.right-panel-active .overlay {
 	transform: translateX(50%);
 }
+
 .auth-container.right-panel-active .overlay-right {
 	transform: translateX(20%);
 }
+
 .auth-container.right-panel-active .overlay-left {
 	transform: translateX(0);
 }
@@ -414,7 +441,8 @@ body.auth-visible .chat-app {
 
 .icon-nav li:not(.active) button:hover i,
 .icon-nav li.active button i {
-    transform: none !important; /* icon stays fixed */
+	transform: none !important;
+	/* icon stays fixed */
 }
 
 .icon-nav button i {
@@ -473,11 +501,25 @@ body.auth-visible .chat-app {
 	margin-top: auto;
 }
 
-.icon-nav.nav-expanded li:nth-child(1) .nav-text { transition-delay: 0.05s; }
-.icon-nav.nav-expanded li:nth-child(2) .nav-text { transition-delay: 0.10s; }
-.icon-nav.nav-expanded li:nth-child(3) .nav-text { transition-delay: 0.15s; }
-.icon-nav.nav-expanded li:nth-child(4) .nav-text { transition-delay: 0.20s; }
-.icon-nav.nav-expanded li:nth-child(5) .nav-text { transition-delay: 0.25s; }
+.icon-nav.nav-expanded li:nth-child(1) .nav-text {
+	transition-delay: 0.05s;
+}
+
+.icon-nav.nav-expanded li:nth-child(2) .nav-text {
+	transition-delay: 0.10s;
+}
+
+.icon-nav.nav-expanded li:nth-child(3) .nav-text {
+	transition-delay: 0.15s;
+}
+
+.icon-nav.nav-expanded li:nth-child(4) .nav-text {
+	transition-delay: 0.20s;
+}
+
+.icon-nav.nav-expanded li:nth-child(5) .nav-text {
+	transition-delay: 0.25s;
+}
 
 .contacts-panel {
 	width: 300px;
@@ -508,11 +550,13 @@ body.auth-visible .chat-app {
 	background-color: var(--bg-dark);
 	border-bottom: 1px solid var(--border-color);
 }
+
 #user-info p {
 	font-size: 0.8rem;
 	color: var(--text-muted);
 	margin-bottom: 0.25rem;
 }
+
 #user-info strong {
 	color: var(--text-light);
 	font-weight: 600;
@@ -632,15 +676,18 @@ body.auth-visible .chat-app {
 	color: var(--text-muted);
 	padding: 2rem;
 }
+
 #chat-placeholder i {
 	font-size: 4rem;
 	margin-bottom: 1.5rem;
 	opacity: 0.3;
 }
+
 #chat-placeholder p {
 	font-size: 1.25rem;
 	font-weight: 500;
 }
+
 #chat-placeholder small {
 	font-size: 0.9rem;
 	max-width: 300px;
@@ -795,10 +842,12 @@ body.auth-visible .chat-app {
 .message.received {
 	align-self: flex-start;
 }
+
 .message.received p {
 	background-color: var(--bubble-received);
 	border-bottom-left-radius: 4px;
 }
+
 .message.received time {
 	align-self: flex-start;
 }
@@ -806,10 +855,12 @@ body.auth-visible .chat-app {
 .message.sent {
 	align-self: flex-end;
 }
+
 .message.sent p {
 	background-color: var(--bubble-sent);
 	border-bottom-right-radius: 4px;
 }
+
 .message.sent time {
 	align-self: flex-end;
 }
@@ -833,6 +884,7 @@ body.auth-visible .chat-app {
 	flex-shrink: 0;
 	transition: color 0.2s;
 }
+
 .chat-panel footer button:hover {
 	color: var(--text-light);
 }
@@ -855,6 +907,7 @@ body.auth-visible .chat-app {
 	font-size: 1rem;
 	outline: none;
 }
+
 #message-form input::placeholder {
 	color: var(--text-muted);
 }
@@ -864,6 +917,7 @@ body.auth-visible .chat-app {
 	padding: 0.5rem;
 	color: var(--primary-color);
 }
+
 #message-form button:hover {
 	color: var(--primary-color-dark);
 }
@@ -878,6 +932,7 @@ body.auth-visible .chat-app {
 	transition: opacity 0.2s;
 	padding: 0.25rem;
 }
+
 .contacts-header-btn:hover {
 	opacity: 1;
 }
@@ -919,6 +974,7 @@ body.auth-visible .chat-app {
 	transform: scale(0.95);
 	transition: transform 0.3s ease;
 }
+
 .modal-overlay.show .modal-content {
 	transform: scale(1);
 }
@@ -929,10 +985,12 @@ body.auth-visible .chat-app {
 	align-items: center;
 	margin-bottom: 1.5rem;
 }
+
 .modal-header h3 {
 	color: var(--primary-color);
 	font-size: 1.5rem;
 }
+
 .modal-close-btn {
 	background: none;
 	border: none;
@@ -941,6 +999,7 @@ body.auth-visible .chat-app {
 	cursor: pointer;
 	transition: color 0.2s;
 }
+
 .modal-close-btn:hover {
 	color: var(--text-light);
 }
@@ -955,12 +1014,14 @@ body.auth-visible .chat-app {
 .form-group {
 	margin-bottom: 1.25rem;
 }
+
 .form-group label {
 	display: block;
 	margin-bottom: 0.5rem;
 	color: var(--text-muted);
 	font-weight: 500;
 }
+
 .modal-input {
 	width: 100%;
 	padding: 0.75rem 1rem;
@@ -971,6 +1032,7 @@ body.auth-visible .chat-app {
 	font-size: 1rem;
 	transition: border-color 0.2s, box-shadow 0.2s;
 }
+
 .modal-input:focus {
 	outline: none;
 	border-color: var(--primary-color);
@@ -991,6 +1053,7 @@ body.auth-visible .chat-app {
 	gap: 0.75rem;
 	margin-top: 2rem;
 }
+
 .modal-btn {
 	padding: 0.65rem 1.25rem;
 	border: none;
@@ -1000,19 +1063,23 @@ body.auth-visible .chat-app {
 	cursor: pointer;
 	transition: all 0.2s;
 }
+
 .modal-btn.primary {
 	background-color: var(--primary-color);
 	color: var(--text-light);
 }
+
 .modal-btn.primary:hover {
 	background-color: var(--primary-color-dark);
 	box-shadow: 0 0 10px var(--primary-color);
 }
+
 .modal-btn.secondary {
 	background-color: transparent;
 	color: var(--text-muted);
 	border: 1px solid var(--border-color);
 }
+
 .modal-btn.secondary:hover {
 	background-color: var(--border-color);
 	color: var(--text-light);
@@ -1022,6 +1089,7 @@ body.auth-visible .chat-app {
 	background-color: var(--error-color);
 	color: var(--text-light);
 }
+
 .modal-btn.primary-danger:hover {
 	background-color: var(--error-color-dark);
 	box-shadow: 0 0 10px var(--error-color);
