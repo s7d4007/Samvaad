@@ -357,42 +357,107 @@ body.auth-visible .chat-app {
 	pointer-events: none;
 }
 
+/* * --- Expandable Icon Navigation --- */
+
 .icon-nav {
-	width: 60px;
-	background-color: var(--bg-dark);
-	padding: 1rem 0;
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	flex-shrink: 0;
-	border-right: 1px solid var(--border-color);
+    width: 58px; /* Default collapsed width */
+    background-color: var(--bg-dark);
+    padding: 1rem 0;
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    border-right: 1px solid var(--border-color);
+    transition: width 0.3s ease-in-out;
+    overflow-x: hidden; /* Hide text when collapsed */
+}
+
+/* This class will be added by JavaScript to expand the nav */
+.icon-nav.nav-expanded {
+    width: 250px;
 }
 
 .icon-nav ul {
-	list-style: none;
-	padding: 0;
-	margin: 0;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    height: 100%; /* Allow pushing logout to bottom */
 }
 
 .icon-nav li {
-	margin-bottom: 2rem;
+    margin: 0.5rem 0;
+    border-radius: 8px; /* Rounded corners for the active item */
+    flex-shrink: 0; /* Prevent list items from shrinking */
+}
+
+.icon-nav .nav-toggle {
+    margin-bottom: 1.5rem; /* Space below the toggle button */
 }
 
 .icon-nav button {
-	background: none;
-	border: none;
-	color: var(--text-light);
-	font-size: 1.5rem;
-	cursor: pointer;
-	opacity: 0.7;
-	transition: opacity 0.2s, color 0.2s, transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-	transform: scale(1);
+    background: none;
+    border: none;
+    color: var(--text-light);
+    cursor: pointer;
+    opacity: 0.7;
+    transform: scale(1);
+    transition: opacity 0.2s, color 0.2s, transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), background-color 0.2s ease;
+    
+    /* Flex setup for icon and text */
+    display: flex;
+    align-items: center;
+    width: 100%;
+    padding: 0.75rem 0; /* Vertical padding */
+    font-size: 1rem; /* Controls the size of the nav-text */
+    font-weight: 500;
 }
 
+/* This container ensures icons are aligned in collapsed state */
+.icon-nav button i {
+    font-size: 1.5rem;
+    width: 100%;
+    text-align: center;
+    flex-shrink: 0; 
+}
+
+/* The text label for each icon */
+.icon-nav .nav-text {
+    opacity: 0;
+    visibility: hidden;
+    white-space: nowrap; /* Prevent text from wrapping */
+    transition: opacity 0.2s ease, visibility 0.2s ease;
+}
+
+/* Show the text when the nav is expanded */
+.icon-nav.nav-expanded .nav-text {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* Hover effect for all buttons */
 .icon-nav button:hover {
-	opacity: 1;
-	color: var(--primary-color);
-	transform: scale(1.2);
+    opacity: 1;
+    color: var(--primary-color);
+    transform: scale(1.1);
+}
+
+/* Specific styling for the currently active item */
+.icon-nav li.active {
+    background-color: var(--bg-light-hover);
+}
+
+.icon-nav li.active button {
+    opacity: 1;
+    color: var(--primary-color);
+    transform: scale(1.1); /* Makes the active item larger */
+    font-weight: 600; /* Bolder text for active item */
+}
+
+/* This pushes the last item (Logout) to the bottom */
+.icon-nav li:last-child {
+    margin-top: auto;
 }
 
 .contacts-panel {

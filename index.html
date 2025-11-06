@@ -92,19 +92,46 @@
     <!-- --- END: Auth Overlay (Sliding) --- -->
 
     <main class="chat-app">
-        <nav class="icon-nav">
-            <ul>
-                <li><button title="Menu"><i class="fa-solid fa-bars"></i></button></li>
-                <li><button title="Profile"><i class="fa-regular fa-user"></i></button></li>
-                <li><button title="Messages"><i class="fa-regular fa-message"></i></button></li>
-                <li><button title="Settings"><i class="fa-solid fa-gear"></i></button></li>
-                <li><button title="Edit"><i class="fa-regular fa-pen-to-square"></i></button></li>
-                <li><button title="Sign Out" id="sign-out-btn"><i
-                            class="fa-solid fa-arrow-right-from-bracket"></i></button>
-                </li>
-            </ul>
-        </nav>
-
+        <nav class="icon-nav" id="main-nav">
+    <ul>
+        <li class="nav-toggle">
+            <button title="Toggle Menu" id="nav-toggle-btn">
+                <i class="fas fa-bars"></i>
+                <span class="nav-text">Collapse</span>
+            </button>
+        </li>
+        <li>
+            <button title="Profile" data-view="profile">
+                <i class="fas fa-user"></i>
+                <span class="nav-text">Profile</span>
+            </button>
+        </li>
+        <li class="active">
+            <button title="Chats" data-view="chats">
+                <i class="fas fa-comment"></i>
+                <span class="nav-text">Chats</span>
+            </button>
+        </li>
+        <li>
+            <button title="Edit" data-view="edit">
+                <i class="fas fa-edit"></i>
+                <span class="nav-text">Edit</span>
+            </button>
+        </li>
+        <li>
+            <button title="Settings" data-view="settings">
+                <i class="fas fa-cog"></i>
+                <span class="nav-text">Settings</span>
+            </button>
+        </li>
+        <li>
+            <button title="Sign Out" id="sign-out-btn">
+                <i class="fas fa-sign-out-alt"></i>
+                <span class="nav-text">Logout</span>
+            </button>
+        </li>
+    </ul>
+</nav>
         <aside class="contacts-panel">
             <header>
                 <h2>Chats</h2>
@@ -137,13 +164,10 @@
             <!-- 2. The Chat Window (hidden by default) -->
             <div id="chat-window">
                 <header>
-                    <!-- These are the new elements our JS is looking for -->
                     <figure class="avatar" id="chat-header-avatar">
                         <!-- Avatar initial will go here -->
                     </figure>
                     <strong id="chat-header-name">...</strong>
-
-                    <!-- This is your existing controls markup -->
                     <div class="chat-controls">
                         <span class="search-icon"><i class="fas fa-search"></i></span>
                         <div class="dropdown-container">
