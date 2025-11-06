@@ -77,6 +77,7 @@ const navToggleBtn = document.getElementById('nav-toggle-btn');
 const chatsView = document.getElementById('chats-view');
 const profileView = document.getElementById('profile-view');
 const settingsView = document.getElementById('settings-view');
+const starView = document.getElementById('star-view');
 
 // --- STEP 3: HANDLE AUTH LOGIC ---
 
@@ -144,6 +145,7 @@ function showView(viewId) {
     chatsView.style.display = 'none';
     profileView.style.display = 'none';
     settingsView.style.display = 'none';
+    starView.style.display = 'none';
 
     const viewToShow = document.getElementById(viewId);
     if (viewToShow) {

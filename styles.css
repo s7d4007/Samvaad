@@ -390,7 +390,8 @@ body {
 }
 
 #profile-view,
-#settings-view {
+#settings-view,
+#star-view {
 	flex-direction: column;
 }
 
