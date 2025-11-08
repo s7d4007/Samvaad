@@ -194,14 +194,51 @@
                 </section>
             </div>
 
+            <!-- START: "Profile" view -->
             <div id="profile-view" class="main-view">
                 <div class="view-header">
                     <h1>Profile</h1>
                 </div>
+
+                <!-- The content is a form that fills the available space -->
                 <div class="view-content">
-                    <p>Profile Settings. <br>Coming Soon...</p>
+                    <form id="profile-form" class="settings-form">
+
+                        <!-- A section for the Display Name -->
+                        <div class="form-section">
+                            <h2>Display Name</h2>
+                            <p>This is the name that other users will see in chats.</p>
+                            <div class="form-group">
+                                <label for="profile-display-name">Name</label>
+                                <input type="text" id="profile-display-name" class="modal-input"
+                                    placeholder="Enter your display name...">
+                            </div>
+                        </div>
+
+                        <!-- A section for the Email (read-only) -->
+                        <div class="form-section">
+                            <h2>Account</h2>
+                            <p>Your email address is used for logging in.</p>
+                            <div class="form-group">
+                                <label for="profile-email">Email</label>
+                                <!-- This input is 'disabled' so the user can't change their email -->
+                                <input type="email" id="profile-email" class="modal-input" disabled>
+                            </div>
+                        </div>
+
+                        <!-- The "Save" button -->
+                        <div class="form-actions">
+                            <button type="submit" class="modal-btn primary">Save Changes</button>
+                            <!-- Saved ! message -->
+                            <span id="profile-save-success" class="save-success-message">
+                                <i class="fas fa-check-circle"></i> Saved!
+                            </span>
+                        </div>
+
+                    </form>
                 </div>
             </div>
+            <!-- END: "Profile" view -->
 
             <div id="settings-view" class="main-view">
                 <div class="view-header">
