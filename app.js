@@ -140,8 +140,6 @@ mainNav.addEventListener('click', (e) => {
 
 // --- START: View Switching Logic ---
 
-// --- START: View Switching Logic ---
-
 function showView(viewId) {
     // 1. Find the currently active view (the one with the class)
     const currentView = document.querySelector('.main-view.view-active');
@@ -161,8 +159,6 @@ function showView(viewId) {
         chatsView.classList.add('view-active');
     }
 }
-
-// --- END: View Switching Logic ---
 
 // --- END: View Switching Logic ---
 
@@ -254,7 +250,6 @@ loginForm.addEventListener('submit', async (e) => {
 
 // Handle Sign Out
 signOutBtn.addEventListener('click', () => {
-    // Now, instead of logging out, just open the modal
     openLogoutModal();
 });
 
@@ -279,11 +274,11 @@ cancelNewChatBtn.addEventListener('click', () => {
     closeNewChatModal();
 });
 
-// Handle the form submission (NEW - v2)
+// Handle the form submission
 newChatForm.addEventListener('submit', async (e) => {
     e.preventDefault();
 
-    // Safety check: is the user logged in?
+    //Checking if the user is logged in?
     if (!currentUserId) {
         console.error('User is not logged in or session is not ready.');
         newChatError.textContent = "Error: Not logged in. Please wait or refresh.";
@@ -299,14 +294,14 @@ newChatForm.addEventListener('submit', async (e) => {
     newChatError.textContent = '';
     newChatError.style.display = 'none';
 
-    // Check 1: Is the user trying to chat with themselves?
+    //Checking if the user is trying to chat with themselves or empty input
     if (emailToChat === loggedInUserEmail) {
         newChatError.textContent = "You can't start a chat with yourself.";
         newChatError.style.display = 'block';
         return; // Stop the function
     }
 
-    // Check 2: Did the user type anything?
+    //Had the user typed an email? 
     if (!emailToChat) {
         newChatError.textContent = "Please enter an email address.";
         newChatError.style.display = 'block';
@@ -327,9 +322,9 @@ newChatForm.addEventListener('submit', async (e) => {
             console.log('Successfully created chat! New Chat ID:', newChatId);
             // Close the modal
             closeNewChatModal();
-            // 1. Manually refresh the chat list
+            //Manually refresh the chat list
             await loadUserChats();
-            // 2. (Bonus UX) Find the new chat in the list and select it
+            // Find the new chat in the list and select it
             const newChatElement = document.querySelector(`.contact-item[data-chat-id="${newChatId}"]`);
             if (newChatElement) {
                 selectChat(newChatElement);
@@ -343,9 +338,9 @@ newChatForm.addEventListener('submit', async (e) => {
     }
     // --- END: NEW, SIMPLIFIED LOGIC ---
 });
-// --- END: NEW CHAT MODAL LOGIC ---
+// --- END: CHAT MODAL LOGIC ---
 
-// --- START: NEW OTP VERIFICATION LOGIC ---
+// --- START: OTP VERIFICATION LOGIC ---
 
 verifyOtpForm.addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -378,7 +373,7 @@ verifyOtpForm.addEventListener('submit', async (e) => {
 
         // 2. SUCCESS! The user is now logged in.
         //    data.user and data.session are now available.
-        //    NOW we must create their 'profiles' row.
+        // Create the user profile in the database
         console.log('OTP Verified! User is logged in:', data.user.email);
 
         const { error: profileError } = await db.from('profiles').insert({
@@ -387,8 +382,8 @@ verifyOtpForm.addEventListener('submit', async (e) => {
         });
 
         if (profileError) {
-            // This is bad, the user is logged in but has no profile.
-            // We should tell them to contact support or retry.
+            // User is logged in but has no profile
+            // Handle the error gracefully
             console.error('Profile Creation Error after OTP:', profileError.message);
             otpError.textContent = 'Login successful, but profile creation failed. Please contact support.';
             otpError.style.display = 'block';
@@ -397,7 +392,7 @@ verifyOtpForm.addEventListener('submit', async (e) => {
 
         // 3. FULL SUCCESS!
         // The user is logged in AND their profile is created.
-        // We can just hide the modal.
+        // Just Hide the modal
         console.log('Profile created successfully.');
         verifyOtpModal.classList.remove('show');
         emailForVerification = ''; // Clear the temp email
@@ -476,27 +471,22 @@ contactsList.addEventListener('click', (e) => {
     if (!clickedLi) {
         return;
     }
-    // We found the <li>! Call our new function with it.
+    // Found the <li>! Call our new function with it.
     selectChat(clickedLi);
 });
 // --- END: CHAT SELECTION LOGIC ---
 
 // --- START: SEND MESSAGE LOGIC ---
 messageForm.addEventListener('submit', async (e) => {
-    // --- THIS IS THE FIX ---
     // 1. Prevent the page from reloading!
     e.preventDefault();
-    // --- END OF FIX ---
-
     // 2. Get the message text
     const messageText = messageInput.value.trim();
-
     // 3. Check if it's empty or if no chat is selected
     if (!messageText || !selectedChatId || !currentUserId) {
         console.log("Cannot send message: no text, chat, or user.");
-        return; // Don't do anything
+        return; // Do nothing
     }
-
     console.log(`Sending message to chat ${selectedChatId}: ${messageText}`);
 
     try {
@@ -507,17 +497,15 @@ messageForm.addEventListener('submit', async (e) => {
                 chat_id: selectedChatId,
                 sender_id: currentUserId,
                 content: messageText,
-                message_type: 'text' // We'll use this later for images
+                message_type: 'text' // For now, all messages are 'text'
             });
 
         if (error) {
             console.error("Error sending message:", error.message);
-            // TODO: Show an error in the UI
+            // Show an error in the UI
         } else {
             // 5. Success! Clear the input field
             messageInput.value = '';
-            // The input field will clear, but the message won't appear
-            // until we add Realtime.
         }
 
     } catch (error) {
@@ -550,7 +538,6 @@ function displayMessage(message) {
     messageDiv.classList.add('message', messageClass);
 
     // Set the inner HTML. We use <p> for the bubble.
-    // (We'll add image/text logic here later)
     messageDiv.innerHTML = `<p>${message.content}</p>`;
 
     // Add this new <div> to the messages area
@@ -718,7 +705,7 @@ function subscribeToChat(chatId) {
     }
 
     // 2. Create a new "channel" to listen to
-    // We'll listen for any INSERTS on the 'messages' table
+    // Listen for any INSERTS on the 'messages' table
     // where the 'chat_id' matches our current chat.
     const channel = db.channel(`chat:${chatId}`);
 
@@ -734,8 +721,8 @@ function subscribeToChat(chatId) {
             // 3. A new message has arrived!
             console.log('New message received!', payload.new);
 
-            // 4. Use our helper function to display it!
-            // We pass payload.new, which is the new message object
+            // 4. Use helper function to display it!
+            // Pass payload.new, which is the new message object
             displayMessage(payload.new);
         }
     )
