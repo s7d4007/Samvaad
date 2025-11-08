@@ -399,15 +399,12 @@ profileForm.addEventListener('submit', async (e) => {
             // Show a real error message to the user
         } else {
             console.log("Profile saved successfully!");
-
             // 2. Show the "Saved!" success message
             profileSaveSuccess.style.display = 'flex'; // Show the message
-
             // 3. Hide the message again after 2 seconds
             setTimeout(() => {
                 profileSaveSuccess.style.display = 'none';
             }, 2000);
-
             loadUserChats();
         }
 
@@ -449,9 +446,6 @@ verifyOtpForm.addEventListener('submit', async (e) => {
             return;
         }
 
-        // 2. SUCCESS! The user is now logged in.
-        //    data.user and data.session are now available.
-        // Create the user profile in the database
         console.log('OTP Verified! User is logged in:', data.user.email);
 
         const { error: profileError } = await db.from('profiles').insert({
@@ -632,13 +626,11 @@ function displayMessage(message) {
 async function loadUserChats() {
     console.log("Loading user chats...");
 
-    if (!contactsList) return; // Safety check for the contacts list element
+    if (!contactsList) return; 
 
-    // Clear the list to prevent duplicates when this function is called multiple times
     contactsList.innerHTML = '';
 
     try {
-        // Call the database RPC function to get all chats for the current user
         const { data: chats, error } = await db.rpc('get_my_chats');
 
         if (error) {
@@ -647,22 +639,20 @@ async function loadUserChats() {
             return;
         }
 
-        // Render the chat items if any exist
         if (chats && chats.length > 0) {
 
             chats.forEach(chat => {
                 const li = document.createElement('li');
                 li.classList.add('contact-item');
 
-                // Store chat metadata on the element for click event handlers
                 li.dataset.chatId = chat.chat_id;
                 li.dataset.chatEmail = chat.other_user_email;
 
-                // Default to the user's email if a display_name is not available
+                // This is the new logic to store the display name
                 const displayName = chat.other_user_display_name || chat.other_user_email;
+                li.dataset.chatName = displayName; // Store it for the header
                 const firstLetter = displayName.charAt(0).toUpperCase();
 
-                // Set the inner HTML for the chat list item
                 li.innerHTML = `
                     <figure class="avatar">
                         <span>${firstLetter}</span>
@@ -677,7 +667,6 @@ async function loadUserChats() {
             });
 
         } else {
-            // Handle the empty state if no chats are found
             contactsList.innerHTML = '<li class="chat-list-empty">No chats yet. Click "+" to start one!</li>';
         }
 
@@ -714,7 +703,7 @@ function selectChat(chatElement) {
     chatWindow.classList.add('active'); // This uses .active CSS
 
     // Update the header with the new chat's info
-    chatHeaderName.textContent = chatEmail;
+    chatHeaderName.textContent = chatElement.dataset.chatName;
     chatHeaderAvatar.innerHTML = `<span>${firstLetter}</span>`;
 
     loadMessages(chatId);
