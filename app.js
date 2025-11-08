@@ -79,6 +79,12 @@ const profileView = document.getElementById('profile-view');
 const settingsView = document.getElementById('settings-view');
 const starView = document.getElementById('star-view');
 
+//Profile Elements
+const profileForm = document.getElementById('profile-form');
+const profileDisplayNameInput = document.getElementById('profile-display-name');
+const profileEmailInput = document.getElementById('profile-email');
+const profileSaveSuccess = document.getElementById('profile-save-success');
+
 // --- STEP 3: HANDLE AUTH LOGIC ---
 
 // --- START:  Sliding Panel Toggle Logic ---
@@ -132,8 +138,11 @@ mainNav.addEventListener('click', (e) => {
     // 3. Get the view name from the button's 'data-view' attribute
     const view = clickedButton.dataset.view;
     if (view) {
-        // Call our helper function to show the correct view
-        showView(view + '-view'); // e.g., 'profile' + '-view' = 'profile-view'
+        // If the user is clicking "Profile", load their data first
+        if (view === 'profile') {
+            loadUserProfile();
+        }
+        showView(view + '-view');
         console.log(`Switched to view: ${view}`);
     }
 });
@@ -336,9 +345,80 @@ newChatForm.addEventListener('submit', async (e) => {
         newChatError.textContent = 'An unexpected error occurred.';
         newChatError.style.display = 'block';
     }
-    // --- END: NEW, SIMPLIFIED LOGIC ---
 });
 // --- END: CHAT MODAL LOGIC ---
+
+// --- START: Profile Page Logic ---
+
+async function loadUserProfile() {
+    if (!currentUserId) return; // Safety check
+
+    // 1. Fetch the user's profile from the database
+    try {
+        const { data, error } = await db
+            .from('profiles')
+            .select('email, display_name') // Get only the columns we need
+            .eq('id', currentUserId)      // For the currently logged-in user
+            .single(); // We only expect one row
+
+        if (error) {
+            console.error("Error loading user profile:", error.message);
+            return;
+        }
+
+        if (data) {
+            // 2. Fill in the form fields with the data
+            profileEmailInput.value = data.email;
+
+            // Use the display_name if it exists, otherwise show an empty string
+            profileDisplayNameInput.value = data.display_name || '';
+        }
+
+    } catch (error) {
+        console.error("An unexpected JS error occurred:", error.message);
+    }
+}
+
+// Handle the "Save Changes" button click
+    profileForm.addEventListener('submit', async (e) => {
+        e.preventDefault(); // Stop the page from reloading
+        if (!currentUserId) return;
+
+        // Get the new name from the input
+        const newDisplayName = profileDisplayNameInput.value.trim();
+
+        try {
+            // 1. Update the 'display_name' in the 'profiles' table
+            const { error } = await db
+                .from('profiles')
+                .update({ display_name: newDisplayName }) // Update with the new name
+                .eq('id', currentUserId); // Where the ID matches the current user
+
+            if (error) {
+                console.error("Error saving profile:", error.message);
+                // TODO: Show a real error message to the user
+            } else {
+                console.log("Profile saved successfully!");
+
+                // 2. Show the "Saved!" success message
+                profileSaveSuccess.style.display = 'flex'; // Show the message
+
+                // 3. Hide the message again after 2 seconds
+                setTimeout(() => {
+                    profileSaveSuccess.style.display = 'none';
+                }, 2000);
+
+                // 4. (Future) Refresh the chat list to show the new name
+                //    This isn't implemented yet,
+                // await loadUserChats(); 
+            }
+
+        } catch (error) {
+            console.error("An unexpected JS error occurred:", error.message);
+        }
+    });
+
+// --- END: Profile Page Logic ---
 
 // --- START: OTP VERIFICATION LOGIC ---
 

@@ -1169,3 +1169,55 @@ body.auth-visible .chat-app {
 #resend-otp-btn {
 	width: 100%;
 }
+
+/* --- Settings Form Layout --- */
+
+.settings-form {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    max-width: 700px;
+    padding: 1rem;
+    gap: 2rem;
+}
+
+.form-section {
+    padding-bottom: 2rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.form-section:last-of-type {
+    border-bottom: none;
+}
+
+.form-section h2 {
+    font-size: 1.25rem;
+    color: var(--text-light);
+    margin-bottom: 0.5rem;
+}
+
+.form-section p {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    margin-bottom: 1.5rem;
+}
+
+.form-actions {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    margin-top: auto; /* Pushes the save button to the bottom */
+    padding-top: 1rem;
+}
+
+/* This styles the 'Saved!' message */
+.save-success-message {
+    display: none; /* Hidden by default */
+    color: var(--glow-color);
+    font-weight: 600;
+    align-items: center;
+    gap: 0.5rem;
+}
+.save-success-message i {
+    font-size: 1.25rem;
+}
