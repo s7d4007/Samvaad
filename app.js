@@ -380,43 +380,41 @@ async function loadUserProfile() {
 }
 
 // Handle the "Save Changes" button click
-    profileForm.addEventListener('submit', async (e) => {
-        e.preventDefault(); // Stop the page from reloading
-        if (!currentUserId) return;
+profileForm.addEventListener('submit', async (e) => {
+    e.preventDefault(); // Stop the page from reloading
+    if (!currentUserId) return;
 
-        // Get the new name from the input
-        const newDisplayName = profileDisplayNameInput.value.trim();
+    // Get the new name from the input
+    const newDisplayName = profileDisplayNameInput.value.trim();
 
-        try {
-            // 1. Update the 'display_name' in the 'profiles' table
-            const { error } = await db
-                .from('profiles')
-                .update({ display_name: newDisplayName }) // Update with the new name
-                .eq('id', currentUserId); // Where the ID matches the current user
+    try {
+        // 1. Update the 'display_name' in the 'profiles' table
+        const { error } = await db
+            .from('profiles')
+            .update({ display_name: newDisplayName }) // Update with the new name
+            .eq('id', currentUserId); // Where the ID matches the current user
 
-            if (error) {
-                console.error("Error saving profile:", error.message);
-                // TODO: Show a real error message to the user
-            } else {
-                console.log("Profile saved successfully!");
+        if (error) {
+            console.error("Error saving profile:", error.message);
+            // Show a real error message to the user
+        } else {
+            console.log("Profile saved successfully!");
 
-                // 2. Show the "Saved!" success message
-                profileSaveSuccess.style.display = 'flex'; // Show the message
+            // 2. Show the "Saved!" success message
+            profileSaveSuccess.style.display = 'flex'; // Show the message
 
-                // 3. Hide the message again after 2 seconds
-                setTimeout(() => {
-                    profileSaveSuccess.style.display = 'none';
-                }, 2000);
+            // 3. Hide the message again after 2 seconds
+            setTimeout(() => {
+                profileSaveSuccess.style.display = 'none';
+            }, 2000);
 
-                // 4. (Future) Refresh the chat list to show the new name
-                //    This isn't implemented yet,
-                // await loadUserChats(); 
-            }
-
-        } catch (error) {
-            console.error("An unexpected JS error occurred:", error.message);
+            loadUserChats();
         }
-    });
+
+    } catch (error) {
+        console.error("An unexpected JS error occurred:", error.message);
+    }
+});
 
 // --- END: Profile Page Logic ---
 
@@ -634,13 +632,13 @@ function displayMessage(message) {
 async function loadUserChats() {
     console.log("Loading user chats...");
 
-    if (!contactsList) return; // Safety check if the element doesn't exist
+    if (!contactsList) return; // Safety check for the contacts list element
 
-    // This is the "whiteboard eraser"
+    // Clear the list to prevent duplicates when this function is called multiple times
     contactsList.innerHTML = '';
 
     try {
-        // 1. Call the database function we created
+        // Call the database RPC function to get all chats for the current user
         const { data: chats, error } = await db.rpc('get_my_chats');
 
         if (error) {
@@ -649,38 +647,37 @@ async function loadUserChats() {
             return;
         }
 
-        // 2. We got the data, now let's render it
+        // Render the chat items if any exist
         if (chats && chats.length > 0) {
 
             chats.forEach(chat => {
-                // Create a new <li> element
                 const li = document.createElement('li');
-
-                // Add a class for styling
                 li.classList.add('contact-item');
 
-                // Add data attributes to store info about this chat
+                // Store chat metadata on the element for click event handlers
                 li.dataset.chatId = chat.chat_id;
                 li.dataset.chatEmail = chat.other_user_email;
 
-                // Set the inner HTML for the chat item
-                li.innerHTML = `
-                        <figure class="avatar">
-                            <!-- Get the first letter of the email for the avatar -->
-                            <span>${chat.other_user_email.charAt(0).toUpperCase()}</span>
-                        </figure>
-                        <div class="contact-info">
-                            <strong>${chat.other_user_email}</strong>
-                            <small>Click to open chat...</small>
-                        </div>
-                    `;
+                // Default to the user's email if a display_name is not available
+                const displayName = chat.other_user_display_name || chat.other_user_email;
+                const firstLetter = displayName.charAt(0).toUpperCase();
 
-                // Add this new <li> to the list in the UI
+                // Set the inner HTML for the chat list item
+                li.innerHTML = `
+                    <figure class="avatar">
+                        <span>${firstLetter}</span>
+                    </figure>
+                    <div class="contact-info">
+                        <strong>${displayName}</strong>
+                        <small>Click to open chat...</small>
+                    </div>
+                `;
+
                 contactsList.appendChild(li);
             });
 
         } else {
-            // Show a "No chats yet" message
+            // Handle the empty state if no chats are found
             contactsList.innerHTML = '<li class="chat-list-empty">No chats yet. Click "+" to start one!</li>';
         }
 
@@ -818,7 +815,7 @@ function subscribeToChat(chatId) {
 // --- END: NEW CHAT LIST LOGIC ---
 
 // --- STEP 4: MANAGE SESSION ---
-db.auth.onAuthStateChange((event, session) => {
+db.auth.onAuthStateChange(async(event, session) => {
 
     if (session) {
         // --- THIS IS THE NEW CHECK ---
