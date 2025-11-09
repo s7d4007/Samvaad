@@ -586,6 +586,63 @@ messageForm.addEventListener('submit', async (e) => {
 });
 // --- END: SEND MESSAGE LOGIC ---
 
+// --- START: STAR MESSAGE LOGIC ---
+
+// This one listener will handle all clicks on star buttons
+messagesArea.addEventListener('click', async (e) => {
+    // 1. Check if a star button was clicked
+    const starButton = e.target.closest('.star-btn');
+    if (!starButton) {
+        return; // The user clicked something else
+    }
+
+    // 2. Get the icon and the message ID
+    const icon = starButton.querySelector('i');
+    const messageDiv = starButton.closest('.message');
+    const messageId = messageDiv.dataset.messageId;
+
+    // 3. Get the *current* state (is it starred or not?)
+    const isStarred = starButton.classList.contains('is-starred');
+    const newState = !isStarred; // The new state will be the opposite
+
+    // 4. Run the animation!
+    // We only run the "pop" animation when starring (not un-starring)
+    if (newState === true) {
+        icon.classList.add('star-animation');
+
+        // Clean up the class after the animation finishes
+        icon.addEventListener('animationend', () => {
+            icon.classList.remove('star-animation');
+        }, { once: true }); // {once: true} is important
+    }
+    
+    // 5. Update the UI *instantly*
+    starButton.classList.toggle('is-starred', newState);
+    icon.classList.toggle('fas', newState); // Solid star
+    icon.classList.toggle('far', !newState); // Outline star
+
+    // 6. Update the database in the background
+    try {
+        const { error } = await db
+            .from('messages')
+            .update({ is_starred: newState })
+            .eq('id', messageId);
+
+        if (error) {
+            console.error("Error updating star:", error.message);
+            // Revert the UI if the database update failed
+            starButton.classList.toggle('is-starred', isStarred);
+            icon.classList.toggle('fas', isStarred);
+            icon.classList.toggle('far', !isStarred);
+        } else {
+            console.log(`Message ${messageId} star status: ${newState}`);
+        }
+    } catch (error) {
+        console.error("An unexpected JS error occurred:", error.message);
+    }
+});
+// --- END: STAR MESSAGE LOGIC ---
+
 // HELPER FUNCTION
 
 // This function just creates the HTML for a single message
@@ -604,9 +661,7 @@ function displayMessage(message) {
 
     const messageDiv = document.createElement('div');
     messageDiv.classList.add('message', messageClass);
-    
     // --- START: New Star Logic ---
-    
     // Add the message ID to the div for easy access
     messageDiv.dataset.messageId = message.id;
 
