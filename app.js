@@ -590,32 +590,51 @@ messageForm.addEventListener('submit', async (e) => {
 
 // This function just creates the HTML for a single message
 function displayMessage(message) {
-    if (!messagesArea) return; // Safety check
+    if (!messagesArea) return; 
 
-    // Check if we're at the bottom before adding the new message
-    const shouldScroll = messagesArea.scrollTop + messagesArea.clientHeight === messagesArea.scrollHeight;
+    const shouldScroll = messagesArea.scrollTop + messagesArea.clientHeight >= messagesArea.scrollHeight - 10;
 
-    // Check if this is a "No messages" placeholder
     const placeholder = messagesArea.querySelector('.chat-list-empty');
     if (placeholder) {
-        placeholder.remove(); // Remove "No messages yet"
+        placeholder.remove(); 
     }
 
-    // Check if the message was sent by the current user
     const isSent = message.sender_id === currentUserId;
     const messageClass = isSent ? 'sent' : 'received';
 
-    // Create the message element
     const messageDiv = document.createElement('div');
     messageDiv.classList.add('message', messageClass);
+    
+    // --- START: New Star Logic ---
+    
+    // Add the message ID to the div for easy access
+    messageDiv.dataset.messageId = message.id;
+
+    // Check if the message is starred and create the star button HTML
+    const starClass = message.is_starred ? 'fas fa-star' : 'far fa-star';
+    const starButtonHtml = `
+        <button class="star-btn ${message.is_starred ? 'is-starred' : ''}" title="Star message">
+            <i class="${starClass}"></i>
+        </button>
+    `;
 
     // Set the inner HTML. We use <p> for the bubble.
-    messageDiv.innerHTML = `<p>${message.content}</p>`;
+    //Add the star button *before* or *after* the bubble based on sent/received
+    if (isSent) {
+        messageDiv.innerHTML = `
+            ${starButtonHtml}
+            <p>${message.content}</p>
+        `;
+    } else {
+        messageDiv.innerHTML = `
+            <p>${message.content}</p>
+            ${starButtonHtml}
+        `;
+    }
+    // --- END: New Star Logic ---
 
-    // Add this new <div> to the messages area
     messagesArea.appendChild(messageDiv);
 
-    // Scroll to the bottom only if we were already at the bottom
     if (shouldScroll) {
         messagesArea.scrollTop = messagesArea.scrollHeight;
     }
