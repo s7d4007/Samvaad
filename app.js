@@ -85,6 +85,9 @@ const profileDisplayNameInput = document.getElementById('profile-display-name');
 const profileEmailInput = document.getElementById('profile-email');
 const profileSaveSuccess = document.getElementById('profile-save-success');
 
+// Star Elements
+const starViewContent = document.getElementById('star-view-content');
+
 // --- STEP 3: HANDLE AUTH LOGIC ---
 
 // --- START:  Sliding Panel Toggle Logic ---
@@ -138,9 +141,13 @@ mainNav.addEventListener('click', (e) => {
     // 3. Get the view name from the button's 'data-view' attribute
     const view = clickedButton.dataset.view;
     if (view) {
-        // If the user is clicking "Profile", load their data first
+        // Check which view is being opened
         if (view === 'profile') {
+            // Load profile data when profile is clicked
             loadUserProfile();
+        } else if (view === 'star') {
+            // Load starred messages when star is clicked
+            loadStarredMessages();
         }
         showView(view + '-view');
         console.log(`Switched to view: ${view}`);
@@ -415,6 +422,79 @@ profileForm.addEventListener('submit', async (e) => {
 
 // --- END: Profile Page Logic ---
 
+// --- START: Starred Messages Logic ---
+
+async function loadStarredMessages() {
+    if (!starViewContent || !currentUserId) return; // Safety checks
+
+    // 1. Show a loading state
+    starViewContent.innerHTML = '<p class="chat-list-empty">Loading starred messages...</p>';
+
+    try {
+        // 2. This is a 2-step query:
+        // First, get all chat IDs the user is a part of
+        const { data: chats, error: chatsError } = await db
+            .from('chat_participants')
+            .select('chat_id')
+            .eq('user_id', currentUserId);
+
+        if (chatsError) {
+            console.error("Error fetching user's chats:", chatsError.message);
+            starViewContent.innerHTML = '<p class="chat-list-empty">Error loading messages.</p>';
+            return;
+        }
+
+        // 3. Extract just the IDs into an array
+        const chatIds = chats.map(c => c.chat_id);
+
+        // 4. Now, find all messages in *those chats* that are starred
+        const { data: messages, error: messagesError } = await db
+            .from('messages')
+            .select('*') // Get all message data
+            .in('chat_id', chatIds) // Where the chat_id is in our list
+            .eq('is_starred', true) // And the message is starred
+            .order('created_at', { ascending: false }); // Show newest first
+
+        if (messagesError) {
+            console.error("Error fetching starred messages:", messagesError.message);
+            starViewContent.innerHTML = '<p class="chat-list-empty">Error loading messages.</p>';
+            return;
+        }
+
+        // 5. Render the messages
+        if (messages && messages.length > 0) {
+            starViewContent.innerHTML = ''; // Clear "Loading..."
+
+            messages.forEach(message => {
+
+                // Check if the message was sent by the current user
+                const isSent = message.sender_id === currentUserId;
+                const messageClass = isSent ? 'sent' : 'received';
+
+                // Create the message element
+                const messageDiv = document.createElement('div');
+                messageDiv.classList.add('message', messageClass);
+                messageDiv.dataset.messageId = message.id; // Add this for consistency
+
+                // Set the inner HTML.
+                messageDiv.innerHTML = `<p>${message.content}</p>`;
+                // Add this new <div> to the *star view*
+                starViewContent.appendChild(messageDiv);
+            });
+
+        } else {
+            // Show the "No Starred Messages" message
+            starViewContent.innerHTML = '<p class="chat-list-empty">No starred messages.</p>';
+        }
+
+    } catch (error) {
+        console.error("An unexpected JS error occurred:", error.message);
+        starViewContent.innerHTML = '<p class="chat-list-empty">An error occurred.</p>';
+    }
+}
+
+// --- END: Starred Messages Logic ---
+
 // --- START: OTP VERIFICATION LOGIC ---
 
 verifyOtpForm.addEventListener('submit', async (e) => {
@@ -615,7 +695,7 @@ messagesArea.addEventListener('click', async (e) => {
             icon.classList.remove('star-animation');
         }, { once: true }); // {once: true} is important
     }
-    
+
     // 5. Update the UI *instantly*
     starButton.classList.toggle('is-starred', newState);
     icon.classList.toggle('fas', newState); // Solid star
@@ -647,13 +727,13 @@ messagesArea.addEventListener('click', async (e) => {
 
 // This function just creates the HTML for a single message
 function displayMessage(message) {
-    if (!messagesArea) return; 
+    if (!messagesArea) return;
 
     const shouldScroll = messagesArea.scrollTop + messagesArea.clientHeight >= messagesArea.scrollHeight - 10;
 
     const placeholder = messagesArea.querySelector('.chat-list-empty');
     if (placeholder) {
-        placeholder.remove(); 
+        placeholder.remove();
     }
 
     const isSent = message.sender_id === currentUserId;
@@ -700,7 +780,7 @@ function displayMessage(message) {
 async function loadUserChats() {
     console.log("Loading user chats...");
 
-    if (!contactsList) return; 
+    if (!contactsList) return;
 
     contactsList.innerHTML = '';
 
@@ -878,7 +958,7 @@ function subscribeToChat(chatId) {
 // --- END: NEW CHAT LIST LOGIC ---
 
 // --- STEP 4: MANAGE SESSION ---
-db.auth.onAuthStateChange(async(event, session) => {
+db.auth.onAuthStateChange(async (event, session) => {
 
     if (session) {
         // --- THIS IS THE NEW CHECK ---

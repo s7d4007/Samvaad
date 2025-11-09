@@ -210,7 +210,8 @@
                             <p>This is the name that other users will see in chats.</p>
                             <div class="form-group">
                                 <label for="profile-display-name">Name</label>
-                                <input type="text" id="profile-display-name" class="modal-input" placeholder="Your Name...">
+                                <input type="text" id="profile-display-name" class="modal-input"
+                                    placeholder="Your Name...">
                             </div>
                         </div>
 
@@ -248,14 +249,17 @@
                 </div>
             </div>
 
+            <!-- START: "Star" view -->
             <div id="star-view" class="main-view">
                 <div class="view-header">
                     <h1>Starred Messages</h1>
                 </div>
-                <div class="view-content">
-                    <p>Starred Messages <br>Coming Soon...</p>
-                </div>
+                <!-- This is the new scrollable area -->
+                <main class="messages-area" id="star-view-content">
+                    <!-- Starred messages will be loaded here by JavaScript -->
+                </main>
             </div>
+            <!-- END: "Star" view -->
 
         </div>
 
