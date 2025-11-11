@@ -240,14 +240,43 @@
             </div>
             <!-- END: "Profile" view -->
 
+            <!-- START: "Settings" view -->
             <div id="settings-view" class="main-view">
                 <div class="view-header">
-                    <h1>Settings <br>Coming Soon...</h1>
+                    <h1>Settings</h1>
                 </div>
+
                 <div class="view-content">
-                    <p>App settings</p>
+                    <form class="settings-form">
+
+                        <!-- Section 1: Appearance -->
+                        <div class="form-section">
+                            <h2>Appearance</h2>
+                            <p>Customize the look and feel of the app.</p>
+
+                            <!-- Theme Toggle Switch -->
+                            <div class="setting-item">
+                                <label for="theme-toggle">Light Mode</label>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="theme-toggle">
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Section 2: Danger Zone (Placeholder) -->
+                        <div class="form-section danger-zone">
+                            <h2>Danger Zone</h2>
+                            <p>Be careful, these actions are permanent.</p>
+                            <button type="button" id="delete-account-btn" class="modal-btn primary-danger">
+                                Delete My Account
+                            </button>
+                        </div>
+
+                    </form>
                 </div>
             </div>
+            <!-- END: "Settings" view -->
 
             <!-- START: "Star" view -->
             <div id="star-view" class="main-view">

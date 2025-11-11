@@ -23,10 +23,30 @@
 	--glow-color: #007BFF;
 }
 
+/* --- Light Mode Theme Definition --- */
+
+body.light-theme {
+    --primary-color: #007BFF;
+    --primary-color-dark: #0056b3;
+    --bg-dark: #FFFFFF;
+    --bg-medium: #F8F9FA; 
+    --bg-light-hover: #E9ECEF;
+    --border-color: #DEE2E6;
+    --bubble-sent: #007BFF;
+    --bubble-received: #E9ECEF;
+    --text-light: #212529;
+    --text-muted: #6C757D;
+    --text-color: #212529;
+    --glow-color: #007BFF;
+    --auth-panel-text: #333; 
+    --slider-bg-off: #CED4DA; 
+}
+
 * {
 	box-sizing: border-box;
 	margin: 0;
 	padding: 0;
+	transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
 }
 
 html,
@@ -1280,3 +1300,82 @@ body.auth-visible .chat-app {
     font-size: 1.25rem;
 }
 
+/* --- Settings Page Specifics --- */
+
+.setting-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 0;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.setting-item:last-of-type {
+    border-bottom: none;
+}
+
+.setting-item label {
+    font-size: 1rem;
+    font-weight: 500;
+    color: var(--text-light);
+}
+
+.toggle-switch {
+    position: relative;
+    display: inline-block;
+    width: 50px;
+    height: 28px;
+}
+
+.toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: var(--bg-dark); /* Off state */
+    border: 1px solid var(--border-color);
+    transition: .4s;
+    border-radius: 28px;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 20px;
+    width: 20px;
+    left: 3px;
+    bottom: 3px;
+    background-color: var(--text-muted);
+    transition: .4s;
+    border-radius: 50%;
+}
+
+input:checked + .slider {
+    background-color: var(--primary-color);
+    border: 1px solid var(--primary-color);
+}
+
+input:checked + .slider:before {
+    transform: translateX(22px);
+    background-color: white;
+}
+
+.danger-zone {
+    border-color: var(--error-color-dark);
+}
+
+.danger-zone h2 {
+    color: var(--error-color);
+}
+
+#delete-account-btn {
+    margin-top: 0.5rem;
+}

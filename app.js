@@ -3,6 +3,23 @@ const { createClient } = supabase;
 // The variables SUPABASE_URL and SUPABASE_ANON_KEY are available from the config.js file
 const db = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 console.log('SupABASE is connected!', db);
+// --- START: THEME LOADER ---
+// This runs immediately when the script loads
+(function() {
+    // Check localStorage for a saved theme
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'light') {
+        // If 'light' is saved, apply the class to the body
+        document.body.classList.add('light-theme');
+        document.addEventListener('DOMContentLoaded', () => {
+            const themeToggle = document.getElementById('theme-toggle');
+            if (themeToggle) {
+                themeToggle.checked = true;
+            }
+        });
+    }
+})();
+// --- END: THEME LOADER ---
 
 //Global Variable Declarations
 let currentUserId = null; // Will hold the user's ID when logged in
@@ -88,6 +105,9 @@ const profileSaveSuccess = document.getElementById('profile-save-success');
 // Star Elements
 const starViewContent = document.getElementById('star-view-content');
 
+//Theme Elements
+const themeToggle = document.getElementById('theme-toggle');
+
 // --- STEP 3: HANDLE AUTH LOGIC ---
 
 // --- START:  Sliding Panel Toggle Logic ---
@@ -153,6 +173,22 @@ mainNav.addEventListener('click', (e) => {
         console.log(`Switched to view: ${view}`);
     }
 });
+
+// --- START: Theme Toggle Logic ---
+themeToggle.addEventListener('change', () => {
+    if (themeToggle.checked) {
+        // If the toggle is "on", add the light-theme class
+        document.body.classList.add('light-theme');
+        // Save the choice to localStorage
+        localStorage.setItem('theme', 'light');
+    } else {
+        // If the toggle is "off", remove the light-theme class
+        document.body.classList.remove('light-theme');
+        // Save the choice to localStorage
+        localStorage.setItem('theme', 'dark');
+    }
+});
+// --- END: Theme Toggle Logic ---
 
 // --- START: View Switching Logic ---
 
