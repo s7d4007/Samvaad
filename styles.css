@@ -1367,45 +1367,42 @@ input:checked + .slider:before {
     margin-top: 0.5rem;
 }
 
+/* --- Minimalist Auto-Hiding Scrollbar --- */
 
-/* --- Auto-Hiding Scrollbar Styling --- */
-
+/* --- Firefox --- */
 /* This targets all scrollable areas */
 .contacts-list,
 .messages-area,
 .view-content {
-    /* --- Firefox --- */
-    /* By default, make the scrollbar (thumb and track) transparent */
+    /* By default, both thumb and track are transparent */
     scrollbar-width: thin;
     scrollbar-color: transparent transparent;
-    transition: scrollbar-color 0.3s ease; /* Smooth fade-in */
+    transition: scrollbar-color 0.3s ease;
 }
 
-/* On hover, Firefox will fade in the scrollbar */
+/* On hover, fade in *only* the thumb. The track stays transparent. */
 .contacts-list:hover,
 .messages-area:hover,
 .view-content:hover {
-    scrollbar-color: var(--primary-color) var(--bg-medium);
+    scrollbar-color: var(--primary-color) transparent;
 }
-
 
 /* --- Webkit (Chrome, Safari, Edge) --- */
 ::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
+    width: 6px;  /* A very thin scrollbar */
+    height: 6px;
 }
 
-/* Make the track (background) transparent by default */
+/* Make the track (background) *always* invisible */
 ::-webkit-scrollbar-track {
     background: transparent;
 }
 
-/* Make the thumb (handle) transparent by default */
+/* Make the thumb (handle) *invisible* by default */
 ::-webkit-scrollbar-thumb {
     background-color: transparent;
-    border-radius: 4px;
-    /* We use a transparent border to keep the same size as the hover state */
-    border: 2px solid transparent; 
+    border-radius: 3px;
+    transition: background-color 0.3s ease;
 }
 
 /* When you hover over ANY of these scrollable areas,
@@ -1414,11 +1411,10 @@ input:checked + .slider:before {
 .contacts-list:hover::-webkit-scrollbar-thumb,
 .messages-area:hover::-webkit-scrollbar-thumb,
 .view-content:hover::-webkit-scrollbar-thumb {
-    background-color: var(--bg-light-hover);
-    border-color: var(--bg-medium); /* Show the border */
+    background-color: var(--primary-color); /* Show the thumb in your theme color */
 }
 
-/* This styles the thumb when hover *directly* over it */
+/* Optional: Make it slightly darker when you hover over the thumb itself */
 ::-webkit-scrollbar-thumb:hover {
-    background-color: var(--primary-color);
+    background-color: var(--primary-color-dark);
 }
