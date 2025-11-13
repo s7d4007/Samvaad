@@ -649,19 +649,6 @@ body.auth-visible .chat-app {
 	overflow-y: auto;
 }
 
-.contacts-list::-webkit-scrollbar {
-	width: 6px;
-}
-
-.contacts-list::-webkit-scrollbar-track {
-	background: var(--bg-medium);
-}
-
-.contacts-list::-webkit-scrollbar-thumb {
-	background: var(--bg-light-hover);
-	border-radius: 3px;
-}
-
 .contact-item {
 	display: flex;
 	align-items: center;
@@ -1378,4 +1365,60 @@ input:checked + .slider:before {
 
 #delete-account-btn {
     margin-top: 0.5rem;
+}
+
+
+/* --- Auto-Hiding Scrollbar Styling --- */
+
+/* This targets all scrollable areas */
+.contacts-list,
+.messages-area,
+.view-content {
+    /* --- Firefox --- */
+    /* By default, make the scrollbar (thumb and track) transparent */
+    scrollbar-width: thin;
+    scrollbar-color: transparent transparent;
+    transition: scrollbar-color 0.3s ease; /* Smooth fade-in */
+}
+
+/* On hover, Firefox will fade in the scrollbar */
+.contacts-list:hover,
+.messages-area:hover,
+.view-content:hover {
+    scrollbar-color: var(--primary-color) var(--bg-medium);
+}
+
+
+/* --- Webkit (Chrome, Safari, Edge) --- */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+/* Make the track (background) transparent by default */
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+/* Make the thumb (handle) transparent by default */
+::-webkit-scrollbar-thumb {
+    background-color: transparent;
+    border-radius: 4px;
+    /* We use a transparent border to keep the same size as the hover state */
+    border: 2px solid transparent; 
+}
+
+/* When you hover over ANY of these scrollable areas,
+ * the scrollbar thumb will fade in.
+ */
+.contacts-list:hover::-webkit-scrollbar-thumb,
+.messages-area:hover::-webkit-scrollbar-thumb,
+.view-content:hover::-webkit-scrollbar-thumb {
+    background-color: var(--bg-light-hover);
+    border-color: var(--bg-medium); /* Show the border */
+}
+
+/* This styles the thumb when hover *directly* over it */
+::-webkit-scrollbar-thumb:hover {
+    background-color: var(--primary-color);
 }
