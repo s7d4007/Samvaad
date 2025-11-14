@@ -108,6 +108,9 @@ const starViewContent = document.getElementById('star-view-content');
 //Theme Elements
 const themeToggle = document.getElementById('theme-toggle');
 
+const dropdownToggle = document.querySelector('.dropdown-toggle');
+const dropdownMenu = document.querySelector('.dropdown-menu');
+
 // --- STEP 3: HANDLE AUTH LOGIC ---
 
 // --- START:  Sliding Panel Toggle Logic ---
@@ -758,6 +761,28 @@ messagesArea.addEventListener('click', async (e) => {
     }
 });
 // --- END: STAR MESSAGE LOGIC ---
+
+// --- START: Chat Header Dropdown Logic ---
+
+dropdownToggle.addEventListener('click', (e) => {
+    // Stop the click from bubbling up to the window listener
+    e.stopPropagation();
+    // Toggle the 'show' class to make the menu appear/disappear
+    dropdownMenu.classList.toggle('show');
+});
+
+// --- END: Chat Header Dropdown Logic ---
+
+// --- START: Global Click Listener (for modals/dropdowns) ---
+
+window.addEventListener('click', () => {
+    // Check if the dropdown menu is currently open
+    if (dropdownMenu.classList.contains('show')) {
+        dropdownMenu.classList.remove('show');
+    }
+});
+
+// --- END: Global Click Listener ---
 
 // HELPER FUNCTION
 
