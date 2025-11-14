@@ -108,8 +108,10 @@ const starViewContent = document.getElementById('star-view-content');
 //Theme Elements
 const themeToggle = document.getElementById('theme-toggle');
 
+//More-Options
 const dropdownToggle = document.querySelector('.dropdown-toggle');
 const dropdownMenu = document.querySelector('.dropdown-menu');
+const exportChatBtn = document.getElementById('export-chat-btn');
 
 // --- STEP 3: HANDLE AUTH LOGIC ---
 
@@ -764,11 +766,71 @@ messagesArea.addEventListener('click', async (e) => {
 
 // --- START: Chat Header Dropdown Logic ---
 
+async function exportChat() {
+    if (!selectedChatId) {
+        console.error("No chat selected to export.");
+        return;
+    }
+
+    console.log(`Exporting chat: ${selectedChatId}`);
+
+    try {
+        // 1. Fetch all messages for the current chat
+        const { data: messages, error } = await db
+            .from('messages')
+            .select('content, created_at, sender_id')
+            .eq('chat_id', selectedChatId)
+            .order('created_at', { ascending: true });
+
+        if (error) {
+            console.error("Error fetching messages for export:", error.message);
+            return;
+        }
+
+        // 2. Format the chat data into a text string
+        const chatHeader = `Chat Export\nChat ID: ${selectedChatId}\nExported on: ${new Date().toLocaleString()}\n\n---\n\n`;
+
+        const chatContent = messages.map(msg => {
+            const prefix = msg.sender_id === currentUserId ? "You" : "Them";
+            const timestamp = new Date(msg.created_at).toLocaleString();
+            return `[${timestamp}] ${prefix}: ${msg.content}`;
+        }).join('\n'); // Add a new line for each message
+
+        const fileContent = chatHeader + chatContent;
+
+        // 3. Create a fake download link and click it
+        const blob = new Blob([fileContent], { type: 'text/plain;charset=utf-8' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = `chat-export-${selectedChatId}.txt`; // File name
+
+        document.body.appendChild(link); // Add link to the document
+        link.click(); // Click the link to trigger download
+        document.body.removeChild(link); // Clean up and remove the link
+
+    } catch (error) {
+        console.error("Error during chat export:", error.message);
+    }
+}
+
+// --- START: Chat Header Dropdown Logic ---
+
 dropdownToggle.addEventListener('click', (e) => {
     // Stop the click from bubbling up to the window listener
     e.stopPropagation();
     // Toggle the 'show' class to make the menu appear/disappear
     dropdownMenu.classList.toggle('show');
+});
+
+exportChatBtn.addEventListener('click', (e) => {
+    // Stop the click from closing the menu immediately
+    e.stopPropagation(); 
+
+    // Call the helper function
+    exportChat();
+
+    // Close the menu after clicking
+    dropdownMenu.classList.remove('show');
 });
 
 // --- END: Chat Header Dropdown Logic ---
