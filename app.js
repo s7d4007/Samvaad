@@ -113,6 +113,15 @@ const dropdownToggle = document.querySelector('.dropdown-toggle');
 const dropdownMenu = document.querySelector('.dropdown-menu');
 const exportChatBtn = document.getElementById('export-chat-btn');
 
+//Upload Button
+const attachmentBtn = document.getElementById('attachment-btn');
+const iconClip = document.getElementById('icon-clip');
+const iconCross = document.getElementById('icon-cross');
+const attachmentMenu = document.getElementById('attachment-menu');
+const uploadFileBtn = document.getElementById('upload-file-btn');
+const fileInput = document.getElementById('file-input');
+const filePreviewName = document.getElementById('file-preview-name');
+
 // --- STEP 3: HANDLE AUTH LOGIC ---
 
 // --- START:  Sliding Panel Toggle Logic ---
@@ -835,12 +844,61 @@ exportChatBtn.addEventListener('click', (e) => {
 
 // --- END: Chat Header Dropdown Logic ---
 
+// --- START: Attachment Menu Logic ---
+
+// This helper function closes the menu and resets the icon
+function closeAttachmentMenu() {
+    attachmentMenu.classList.remove('show');
+    iconClip.style.display = 'inline';
+    iconCross.style.display = 'none';
+    filePreviewName.textContent = ''; // Clear file preview
+    fileInput.value = null; // Clear the file input
+}
+
+// Main toggle button for the "paperclip"
+attachmentBtn.addEventListener('click', (e) => {
+    e.stopPropagation(); // Stop it from closing the dropdown menu if it's open
+
+    const isMenuOpen = attachmentMenu.classList.toggle('show');
+
+    if (isMenuOpen) {
+        // Change to "cross" icon
+        iconClip.style.display = 'none';
+        iconCross.style.display = 'inline';
+    } else {
+        // Change back to "clip" icon and clear any selected file
+        closeAttachmentMenu();
+    }
+});
+
+// "Upload File" button clicks the hidden file input
+uploadFileBtn.addEventListener('click', () => {
+    fileInput.click(); // Trigger the hidden file selector
+});
+
+// Listen for when a file is selected
+fileInput.addEventListener('change', () => {
+    if (fileInput.files && fileInput.files.length > 0) {
+        // A file was selected! Show its name.
+        const fileName = fileInput.files[0].name;
+        filePreviewName.textContent = `Selected: ${fileName}`;
+        console.log("File selected:", fileName);
+    }
+});
+
+// --- END: Attachment Menu Logic ---
+
 // --- START: Global Click Listener (for modals/dropdowns) ---
 
 window.addEventListener('click', () => {
     // Check if the dropdown menu is currently open
     if (dropdownMenu.classList.contains('show')) {
         dropdownMenu.classList.remove('show');
+    }
+
+    // Check if the attachment menu is currently open
+    if (attachmentMenu.classList.contains('show')) {
+        closeAttachmentMenu();
     }
 });
 

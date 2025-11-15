@@ -987,6 +987,49 @@ body.auth-visible .chat-app {
     color: var(--primary-color);
 }
 
+/* --- Attachment Menu --- */
+#attachment-menu {
+    display: none; /* Hide by default */
+    padding: 0.75rem 1rem;
+    background-color: var(--bg-medium);
+    border-top: 1px solid var(--border-color); /* The border is now here */
+    flex-direction: row;
+    align-items: center;
+    gap: 1rem;
+    
+    /* Animation for appearing */
+    transform: translateY(20px);
+    opacity: 0;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+/* This class will be added by JavaScript */
+#attachment-menu.show {
+    display: flex;
+    transform: translateY(0);
+    opacity: 1;
+}
+
+/* This is the text for "file.png" */
+#file-preview-name {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    font-style: italic;
+    
+    /* Truncate long file names */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Re-use the modal button style for the "Upload" button */
+#upload-file-btn {
+    /* The .modal-btn and .secondary classes are already defined */
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
 .chat-panel footer {
 	display: flex;
 	align-items: center;
@@ -994,7 +1037,6 @@ body.auth-visible .chat-app {
 	background-color: var(--bg-medium);
 	flex-shrink: 0;
 	gap: 0.75rem;
-	border-top: 1px solid var(--border-color);
 }
 
 .chat-panel footer button {

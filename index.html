@@ -178,9 +178,19 @@
                         <main class="messages-area" id="messages-area">
                         </main>
 
+                        <div id="attachment-menu">
+                            <button id="upload-file-btn" class="modal-btn secondary">
+                                <i class="fas fa-file-alt"></i>
+                                Upload File
+                            </button>
+                            <p id="file-preview-name"></p>
+                        </div>
+
                         <footer>
-                            <button title="Attachments">
-                                <i class="fas fa-paperclip"></i>
+                            <input type="file" id="file-input" style="display: none;">
+                            <button title="Attachments" id="attachment-btn">
+                                <i class="fas fa-paperclip" id="icon-clip"></i>
+                                <i class="fas fa-times" id="icon-cross" style="display: none;"></i>
                             </button>
                             <form id="message-form">
                                 <input type="text" id="message-input" placeholder="Type a message..." autocomplete="off"
