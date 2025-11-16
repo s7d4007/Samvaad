@@ -1051,20 +1051,21 @@ body.auth-visible .chat-app {
 #attachment-menu {
     position: absolute;
     bottom: 70px; /* Position it just above the footer */
-    left: 1rem;
+    left: 0.75rem;
     width: 100%; 
-    max-width: 200px; 
+    max-width: 250px; 
+
     background-color: var(--bg-medium);
     border: 1px solid var(--border-color);
     border-radius: 8px;
-    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.3);
-    padding: 12px;
+    box-shadow: 0 -4px 20px rgba(0,0,0,0.3);
+    padding: 0.4rem; /* <-- ADJUSTED: Reduced overall padding */
+
     display: flex;
-    flex-direction: column; /* Stack buttons vertically */
-    gap: 0.5rem;
-    z-index: 9; /* Just below the footer */
-    
-    /* Animation properties */
+    flex-direction: column;
+    gap: 0.25rem; /* <-- ADJUSTED: Reduced gap between buttons */
+    z-index: 9;
+
     opacity: 0;
     visibility: hidden;
     transform: translateY(10px) scale(0.95);
@@ -1094,7 +1095,7 @@ body.auth-visible .chat-app {
     gap: 0.75rem;
     background: transparent;
     border: none;
-    padding: 10px;
+    padding: 0.5rem 0.75rem;
     /* This will automatically use the .modal-btn styles */
 }
 
