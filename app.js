@@ -846,46 +846,42 @@ exportChatBtn.addEventListener('click', (e) => {
 
 // --- START: Attachment Menu Logic ---
 
-// This helper function closes the menu and resets the icon
+// This helper function cleanly closes the menu
 function closeAttachmentMenu() {
     attachmentMenu.classList.remove('show');
-    iconClip.style.display = 'inline';
-    iconCross.style.display = 'none';
-    filePreviewName.textContent = ''; // Clear file preview
-    fileInput.value = null; // Clear the file input
+    attachmentBtn.classList.remove('toggled'); // Use class, not style
+    filePreviewName.textContent = '';
+    fileInput.value = null;
 }
 
 // Main toggle button for the "paperclip"
 attachmentBtn.addEventListener('click', (e) => {
-    e.stopPropagation(); // Stop it from closing the dropdown menu if it's open
-
-    const isMenuOpen = attachmentMenu.classList.toggle('show');
-
-    if (isMenuOpen) {
-        // Change to "cross" icon
-        iconClip.style.display = 'none';
-        iconCross.style.display = 'inline';
+    e.stopPropagation();
+    
+    // Toggle the "toggled" class on the button for the animation
+    const isToggled = attachmentBtn.classList.toggle('toggled');
+    
+    // Toggle the "show" class on the menu
+    if (isToggled) {
+        attachmentMenu.classList.add('show');
     } else {
-        // Change back to "clip" icon and clear any selected file
         closeAttachmentMenu();
     }
 });
 
 // "Upload File" button clicks the hidden file input
 uploadFileBtn.addEventListener('click', () => {
-    fileInput.click(); // Trigger the hidden file selector
+    fileInput.click();
 });
 
 // Listen for when a file is selected
 fileInput.addEventListener('change', () => {
     if (fileInput.files && fileInput.files.length > 0) {
-        // A file was selected! Show its name.
         const fileName = fileInput.files[0].name;
         filePreviewName.textContent = `Selected: ${fileName}`;
         console.log("File selected:", fileName);
     }
 });
-
 // --- END: Attachment Menu Logic ---
 
 // --- START: Global Click Listener (for modals/dropdowns) ---
