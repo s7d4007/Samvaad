@@ -1030,6 +1030,8 @@ body.auth-visible .chat-app {
     gap: 0.5rem;
 }
 
+/* End Attatchment menu */
+
 .chat-panel footer {
 	display: flex;
 	align-items: center;
