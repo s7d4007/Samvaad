@@ -678,38 +678,107 @@ contactsList.addEventListener('click', (e) => {
 });
 // --- END: CHAT SELECTION LOGIC ---
 
-// --- START: SEND MESSAGE LOGIC ---
-messageForm.addEventListener('submit', async (e) => {
-    // 1. Prevent the page from reloading!
-    e.preventDefault();
-    // 2. Get the message text
-    const messageText = messageInput.value.trim();
-    // 3. Check if it's empty or if no chat is selected
-    if (!messageText || !selectedChatId || !currentUserId) {
-        console.log("Cannot send message: no text, chat, or user.");
-        return; // Do nothing
+// --- START: UPLOAD ATTACHMENT LOGIC ---
+
+async function sendAttachment() {
+    if (!selectedChatId || !currentUserId || !fileInput.files || fileInput.files.length === 0) {
+        console.error("Attachment failed: No file or chat selected.");
+        return;
     }
-    console.log(`Sending message to chat ${selectedChatId}: ${messageText}`);
+
+    const file = fileInput.files[0];
+    const fileExtension = file.name.split('.').pop().toLowerCase();
+    
+    // Create a unique path (user_id/chat_id/timestamp_filename)
+    const filePath = `${currentUserId}/${selectedChatId}/${Date.now()}_${file.name}`;
+    
+    // Determine message type for display later
+    let messageType = 'file';
+    if (['png', 'jpg', 'jpeg', 'gif', 'webp'].includes(fileExtension)) {
+        messageType = 'image';
+    }
 
     try {
-        // 4. Send the message to the database
+        // 1. Upload the file to Supabase Storage
+        console.log(`Uploading file: ${filePath}`);
+        
+        // This call requires the INSERT RLS policy we set up earlier
+        const { data: uploadData, error: uploadError } = await db.storage
+            .from('chat_media')
+            .upload(filePath, file, {
+                cacheControl: '3600',
+                upsert: false
+            });
+
+        if (uploadError) {
+            console.error("Storage Upload Error:", uploadError.message);
+            // TODO: Display an error message to the user
+            return;
+        }
+        
+        // 2. Get the public URL for the file
+        const fileUrl = `${SUPABASE_URL}/storage/v1/object/public/chat_media/${filePath}`;
+        
+        // 3. Insert the message row with the file's URL
+        const { error: insertError } = await db
+            .from('messages')
+            .insert({
+                chat_id: selectedChatId,
+                sender_id: currentUserId,
+                content: fileUrl, // The content is the URL
+                message_type: messageType // 'image' or 'file'
+            });
+
+        if (insertError) {
+            console.error("Database Insert Error:", insertError.message);
+            // If the insert fails, you might want to delete the file from storage!
+            return;
+        }
+
+        console.log(`Attachment sent successfully as type: ${messageType}`);
+        
+    } catch (error) {
+        console.error("General Upload Error:", error.message);
+    } finally {
+        // 4. Clean up the UI, regardless of success or failure
+        closeAttachmentMenu();
+    }
+}
+
+// --- END: UPLOAD ATTACHMENT LOGIC ---
+
+// --- START: SEND MESSAGE LOGIC ---
+messageForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    // Check if a file is attached (the new logic)
+    if (fileInput.files && fileInput.files.length > 0) {
+        // If a file is selected, upload it and return.
+        await sendAttachment();
+        return;
+    }
+    
+    // Standard Text Message Logic (Rest of the original function)
+    const messageText = messageInput.value.trim();
+    if (!messageText || !selectedChatId || !currentUserId) {
+        return; 
+    }
+
+    try {
         const { error } = await db
             .from('messages')
             .insert({
                 chat_id: selectedChatId,
                 sender_id: currentUserId,
                 content: messageText,
-                message_type: 'text' // For now, all messages are 'text'
+                message_type: 'text' 
             });
 
         if (error) {
             console.error("Error sending message:", error.message);
-            // Show an error in the UI
         } else {
-            // 5. Success! Clear the input field
             messageInput.value = '';
         }
-
     } catch (error) {
         console.error("An unexpected JS error occurred:", error.message);
     }
@@ -904,13 +973,12 @@ window.addEventListener('click', () => {
 
 // This function just creates the HTML for a single message
 function displayMessage(message) {
-    if (!messagesArea) return;
-
+    if (!messagesArea) return; 
+    
     const shouldScroll = messagesArea.scrollTop + messagesArea.clientHeight >= messagesArea.scrollHeight - 10;
-
     const placeholder = messagesArea.querySelector('.chat-list-empty');
     if (placeholder) {
-        placeholder.remove();
+        placeholder.remove(); 
     }
 
     const isSent = message.sender_id === currentUserId;
@@ -918,10 +986,32 @@ function displayMessage(message) {
 
     const messageDiv = document.createElement('div');
     messageDiv.classList.add('message', messageClass);
-    // --- START: New Star Logic ---
-    // Add the message ID to the div for easy access
     messageDiv.dataset.messageId = message.id;
 
+    // --- START: Content Rendering Logic ---
+    let contentHTML;
+    
+    if (message.message_type === 'image') {
+        // Render image in a wrapper with max-width limits
+        contentHTML = `<a href="${message.content}" target="_blank" style="display: block;">
+            <img src="${message.content}" alt="Image attachment" style="max-width: 250px; max-height: 200px; height: auto; border-radius: 8px;">
+        </a>`;
+    } else if (message.message_type === 'file') {
+        // Render general file as a link/icon
+        const urlParts = message.content.split('/');
+        const fileName = urlParts[urlParts.length - 1].split('_').pop(); 
+        contentHTML = `
+            <div style="display: flex; align-items: center; gap: 0.5rem; padding: 0.75rem 1rem;">
+                <i class="fas fa-file-alt" style="font-size: 1.2rem;"></i>
+                <a href="${message.content}" target="_blank" style="color: inherit; text-decoration: underline; font-weight: 500;">${fileName}</a>
+            </div>
+        `;
+    } else {
+        // Standard text message
+        contentHTML = `<p>${message.content}</p>`;
+    }
+    // --- END: Content Rendering Logic ---
+    
     // Check if the message is starred and create the star button HTML
     const starClass = message.is_starred ? 'fas fa-star' : 'far fa-star';
     const starButtonHtml = `
@@ -930,20 +1020,12 @@ function displayMessage(message) {
         </button>
     `;
 
-    // Set the inner HTML. We use <p> for the bubble.
-    //Add the star button *before* or *after* the bubble based on sent/received
+    // Set the inner HTML. The star button placement depends on sent/received
     if (isSent) {
-        messageDiv.innerHTML = `
-            ${starButtonHtml}
-            <p>${message.content}</p>
-        `;
+        messageDiv.innerHTML = `${starButtonHtml} ${contentHTML}`;
     } else {
-        messageDiv.innerHTML = `
-            <p>${message.content}</p>
-            ${starButtonHtml}
-        `;
+        messageDiv.innerHTML = `${contentHTML} ${starButtonHtml}`;
     }
-    // --- END: New Star Logic ---
 
     messagesArea.appendChild(messageDiv);
 
