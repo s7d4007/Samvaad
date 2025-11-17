@@ -214,7 +214,7 @@ function showView(viewId) {
         currentView.classList.remove('view-active');
     }
 
-    // 2. Find the new view I want to show
+    // 2. Find the new view to show
     const viewToShow = document.getElementById(viewId);
     if (viewToShow) {
         // Add the class to make it fade in
@@ -232,10 +232,10 @@ function showView(viewId) {
 const togglePassword = (input, button) => {
     if (input.type === 'password') {
         input.type = 'text';
-        button.innerHTML = '<i class="fas fa-eye-slash"></i>'; // Use Font Awesome
+        button.innerHTML = '<i class="fas fa-eye-slash"></i>';
     } else {
         input.type = 'password';
-        button.innerHTML = '<i class="fas fa-eye"></i>'; // Use Font Awesome
+        button.innerHTML = '<i class="fas fa-eye"></i>';
     }
 };
 
@@ -248,7 +248,7 @@ toggleSignupPasswordBtn.addEventListener('click', () => {
     togglePassword(signupPasswordInput, toggleSignupPasswordBtn);
 });
 
-// Handle Sign Up (NEW v2 - With OTP)
+// Handle Sign Up
 signupForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     const email = document.getElementById('signup-email').value;
@@ -712,7 +712,6 @@ async function sendAttachment() {
 
         if (uploadError) {
             console.error("Storage Upload Error:", uploadError.message);
-            // TODO: Display an error message to the user
             return;
         }
         
