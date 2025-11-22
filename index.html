@@ -280,15 +280,16 @@
                         <div class="form-section">
                             <h2>Chat Wallpaper</h2>
                             <p>Choose a background image for your chats.</p>
-                            
+
                             <div class="setting-item" style="justify-content: flex-start; gap: 1rem;">
                                 <input type="file" id="wallpaper-input" accept="image/*" style="display: none;">
-                                
+
                                 <button type="button" id="change-wallpaper-btn" class="modal-btn secondary">
                                     <i class="fas fa-image"></i> Change
                                 </button>
 
-                                <button type="button" id="remove-wallpaper-btn" class="modal-btn secondary" style="display: none; border-color: var(--error-color); color: var(--error-color);">
+                                <button type="button" id="remove-wallpaper-btn" class="modal-btn secondary"
+                                    style="display: none; border-color: var(--error-color); color: var(--error-color);">
                                     <i class="fas fa-trash"></i> Remove
                                 </button>
                             </div>
@@ -396,6 +397,19 @@
                     <button type="button" id="resend-otp-btn" class="auth-toggle-btn">Resend Code</button>
                 </p>
             </form>
+        </div>
+    </div>
+
+    <div id="custom-alert-modal" class="modal-overlay">
+        <div class="modal-content" style="text-align: center;">
+            <div class="modal-header" style="justify-content: center; margin-bottom: 1rem;">
+                <i class="fas fa-exclamation-circle" style="font-size: 3rem; color: var(--error-color);"></i>
+            </div>
+            <h3 id="alert-title" style="margin-bottom: 0.5rem; color: var(--text-light);">Oops!</h3>
+            <p id="alert-message" class="modal-intro" style="margin-bottom: 1.5rem;">Something went wrong.</p>
+            <div class="modal-actions" style="justify-content: center;">
+                <button type="button" id="close-alert-btn" class="modal-btn primary">Got it</button>
+            </div>
         </div>
     </div>
     <script src="config.js"></script>

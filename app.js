@@ -1231,21 +1231,42 @@ const wallpaperInput = document.getElementById('wallpaper-input');
 const changeWallpaperBtn = document.getElementById('change-wallpaper-btn');
 const removeWallpaperBtn = document.getElementById('remove-wallpaper-btn');
 
+// Custom Alert Elements
+const customAlertModal = document.getElementById('custom-alert-modal');
+const alertTitle = document.getElementById('alert-title');
+const alertMessage = document.getElementById('alert-message');
+const closeAlertBtn = document.getElementById('close-alert-btn');
+
+// Helper: Show Custom Alert
+function showCustomAlert(title, message) {
+    alertTitle.textContent = title;
+    alertMessage.textContent = message;
+    customAlertModal.classList.add('show');
+}
+
+// Helper: Close Custom Alert
+closeAlertBtn.addEventListener('click', () => {
+    customAlertModal.classList.remove('show');
+});
+
 // 1. Load Wallpaper on Startup
 function loadSavedWallpaper() {
-    const savedWallpaper = localStorage.getItem('chat_wallpaper');
-    if (savedWallpaper) {
-        messagesArea.style.backgroundImage = `url(${savedWallpaper})`;
-        removeWallpaperBtn.style.display = 'inline-flex'; // Show remove button
+    try {
+        const savedWallpaper = localStorage.getItem('chat_wallpaper');
+        if (savedWallpaper) {
+            messagesArea.style.backgroundImage = `url(${savedWallpaper})`;
+            removeWallpaperBtn.style.display = 'inline-flex'; 
+        }
+    } catch (e) {
+        console.error("Error loading wallpaper:", e);
     }
 }
 
-// Call this immediately to check if we have one
 loadSavedWallpaper();
 
 // 2. Handle "Change" Button Click
 changeWallpaperBtn.addEventListener('click', () => {
-    wallpaperInput.click(); // Trigger the hidden file input
+    wallpaperInput.click(); 
 });
 
 // 3. Handle File Selection
@@ -1253,9 +1274,14 @@ wallpaperInput.addEventListener('change', (e) => {
     if (e.target.files && e.target.files[0]) {
         const file = e.target.files[0];
 
-        // Check file size (Max 2MB recommended for LocalStorage)
-        if (file.size > 2000000) {
-            alert("Image is too large! Please choose an image under 2MB.");
+        // LIMIT CHECK: 3MB (3 * 1024 * 1024 bytes)
+        const limit = 3 * 1024 * 1024; 
+
+        if (file.size > limit) {
+            // Show our FANCY modal instead of alert()
+            showCustomAlert("File Too Large", "Please choose an image smaller than 3MB. High-resolution images are too heavy for this app!");
+            // Reset input so they can try again
+            wallpaperInput.value = ''; 
             return;
         }
 
@@ -1265,39 +1291,30 @@ wallpaperInput.addEventListener('change', (e) => {
             const base64String = event.target.result;
 
             try {
-                // Save to Local Storage
+                // Attempt to save to Local Storage
                 localStorage.setItem('chat_wallpaper', base64String);
                 
                 // Apply immediately
                 messagesArea.style.backgroundImage = `url(${base64String})`;
-                
-                // Show the remove button
                 removeWallpaperBtn.style.display = 'inline-flex';
-                
                 console.log("Wallpaper updated successfully!");
+                
             } catch (error) {
+                // This catches the "QuotaExceededError" if LocalStorage is full
                 console.error("Storage failed:", error);
-                alert("Storage full! Try a smaller image.");
+                showCustomAlert("Storage Full", "Your browser's local storage is full. Try a smaller image or lower resolution.");
             }
         };
 
-        // Read the file as a Data URL (Base64)
         reader.readAsDataURL(file);
     }
 });
 
 // 4. Handle "Remove" Button Click
 removeWallpaperBtn.addEventListener('click', () => {
-    // Remove from storage
     localStorage.removeItem('chat_wallpaper');
-    
-    // Remove from DOM
     messagesArea.style.backgroundImage = 'none';
-    
-    // Hide this button
     removeWallpaperBtn.style.display = 'none';
-    
-    // Reset input
     wallpaperInput.value = '';
 });
 
