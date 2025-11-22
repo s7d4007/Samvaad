@@ -275,7 +275,26 @@
                             </div>
                         </div>
 
-                        <!-- Section 2: Danger Zone (Placeholder) -->
+
+                        <!-- Section 2: Chat Wallpaper -->
+                        <div class="form-section">
+                            <h2>Chat Wallpaper</h2>
+                            <p>Choose a background image for your chats.</p>
+                            
+                            <div class="setting-item" style="justify-content: flex-start; gap: 1rem;">
+                                <input type="file" id="wallpaper-input" accept="image/*" style="display: none;">
+                                
+                                <button type="button" id="change-wallpaper-btn" class="modal-btn secondary">
+                                    <i class="fas fa-image"></i> Change
+                                </button>
+
+                                <button type="button" id="remove-wallpaper-btn" class="modal-btn secondary" style="display: none; border-color: var(--error-color); color: var(--error-color);">
+                                    <i class="fas fa-trash"></i> Remove
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Section 3: Danger Zone -->
                         <div class="form-section danger-zone">
                             <h2>Danger Zone</h2>
                             <p>Be careful, these actions are permanent.</p>

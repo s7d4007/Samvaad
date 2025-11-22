@@ -21,6 +21,16 @@ console.log('SupABASE is connected!', db);
 })();
 // --- END: THEME LOADER ---
 
+// --- START: WALLPAPER LOADER ---
+(function() {
+    const savedWallpaper = localStorage.getItem('chat_wallpaper');
+    // Can't access DOM elements like 'messagesArea' efficiently here 
+    // because the DOM might not be ready, So handle the applying
+    // inside the main DOMContentLoaded or later in the script.
+    // However, checking if it exists allows to set state early if needed.
+})();
+// --- END: WALLPAPER LOADER ---
+
 //Global Variable Declarations
 let currentUserId = null; // Will hold the user's ID when logged in
 let selectedChatId = null; // This will store the ID of the active chat
@@ -1214,6 +1224,84 @@ function subscribeToChat(chatId) {
 }
 // --- END OF REALTIME FUNCTION ---
 // --- END: NEW CHAT LIST LOGIC ---
+
+// --- START: WALLPAPER LOGIC ---
+
+const wallpaperInput = document.getElementById('wallpaper-input');
+const changeWallpaperBtn = document.getElementById('change-wallpaper-btn');
+const removeWallpaperBtn = document.getElementById('remove-wallpaper-btn');
+
+// 1. Load Wallpaper on Startup
+function loadSavedWallpaper() {
+    const savedWallpaper = localStorage.getItem('chat_wallpaper');
+    if (savedWallpaper) {
+        messagesArea.style.backgroundImage = `url(${savedWallpaper})`;
+        removeWallpaperBtn.style.display = 'inline-flex'; // Show remove button
+    }
+}
+
+// Call this immediately to check if we have one
+loadSavedWallpaper();
+
+// 2. Handle "Change" Button Click
+changeWallpaperBtn.addEventListener('click', () => {
+    wallpaperInput.click(); // Trigger the hidden file input
+});
+
+// 3. Handle File Selection
+wallpaperInput.addEventListener('change', (e) => {
+    if (e.target.files && e.target.files[0]) {
+        const file = e.target.files[0];
+
+        // Check file size (Max 2MB recommended for LocalStorage)
+        if (file.size > 2000000) {
+            alert("Image is too large! Please choose an image under 2MB.");
+            return;
+        }
+
+        const reader = new FileReader();
+
+        reader.onload = function(event) {
+            const base64String = event.target.result;
+
+            try {
+                // Save to Local Storage
+                localStorage.setItem('chat_wallpaper', base64String);
+                
+                // Apply immediately
+                messagesArea.style.backgroundImage = `url(${base64String})`;
+                
+                // Show the remove button
+                removeWallpaperBtn.style.display = 'inline-flex';
+                
+                console.log("Wallpaper updated successfully!");
+            } catch (error) {
+                console.error("Storage failed:", error);
+                alert("Storage full! Try a smaller image.");
+            }
+        };
+
+        // Read the file as a Data URL (Base64)
+        reader.readAsDataURL(file);
+    }
+});
+
+// 4. Handle "Remove" Button Click
+removeWallpaperBtn.addEventListener('click', () => {
+    // Remove from storage
+    localStorage.removeItem('chat_wallpaper');
+    
+    // Remove from DOM
+    messagesArea.style.backgroundImage = 'none';
+    
+    // Hide this button
+    removeWallpaperBtn.style.display = 'none';
+    
+    // Reset input
+    wallpaperInput.value = '';
+});
+
+// --- END: WALLPAPER LOGIC ---
 
 // --- STEP 4: MANAGE SESSION ---
 db.auth.onAuthStateChange(async (event, session) => {
