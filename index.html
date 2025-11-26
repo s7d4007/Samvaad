@@ -412,6 +412,22 @@
             </div>
         </div>
     </div>
+
+    <div id="confirm-delete-modal" class="modal-overlay">
+        <div class="modal-content" style="text-align: center;">
+            <div class="modal-header" style="justify-content: center; margin-bottom: 1rem;">
+                <i class="fas fa-trash-alt" style="font-size: 3rem; color: var(--error-color);"></i>
+            </div>
+            <h3 style="margin-bottom: 0.5rem; color: var(--text-light);">Delete Message?</h3>
+            <p class="modal-intro" style="margin-bottom: 1.5rem;">This action cannot be undone. Are you sure?</p>
+            <div class="modal-actions" style="justify-content: center;">
+                <button type="button" id="cancel-delete-btn" class="modal-btn secondary">Cancel</button>
+                <button type="button" id="confirm-delete-btn" class="modal-btn primary-danger">
+                    Delete It
+                </button>
+            </div>
+        </div>
+    </div>
     <script src="config.js"></script>
     <script type="module" src="app.js"></script>
 </body>

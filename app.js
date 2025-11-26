@@ -852,40 +852,66 @@ messagesArea.addEventListener('click', async (e) => {
 // --- END: STAR MESSAGE LOGIC ---
 
 // --- START: DELETE MESSAGE LOGIC ---
-messagesArea.addEventListener('click', async (e) => {
-    // 1. Check if the Delete button was clicked
+
+// 1. Get Elements
+const confirmDeleteModal = document.getElementById('confirm-delete-modal');
+const confirmDeleteBtn = document.getElementById('confirm-delete-btn');
+const cancelDeleteBtn = document.getElementById('cancel-delete-btn');
+let messageToDeleteId = null; // Variable to store the ID temporarily
+
+// 2. Listen for clicks on the Trash Icon (Opens Modal)
+messagesArea.addEventListener('click', (e) => {
+    // Check if the Delete button was clicked
     const deleteBtn = e.target.closest('.delete-btn');
     if (!deleteBtn) return;
 
-    // 2. Get the Message ID
+    // Get the Message ID
     const messageDiv = deleteBtn.closest('.message');
-    const messageId = messageDiv.dataset.messageId;
+    messageToDeleteId = messageDiv.dataset.messageId;
 
-    if (!confirm("Are you sure you want to delete this message?")) {
-        return;
-    }
+    // Show the custom modal (instead of window.confirm)
+    confirmDeleteModal.classList.add('show');
+});
+
+// 3. Handle "Cancel"
+cancelDeleteBtn.addEventListener('click', () => {
+    confirmDeleteModal.classList.remove('show');
+    messageToDeleteId = null; // Clear the stored ID
+});
+
+// 4. Handle "Delete It" (Performs the Action)
+confirmDeleteBtn.addEventListener('click', async () => {
+    if (!messageToDeleteId) return;
 
     try {
-        // 3. Delete from Supabase
+        // Delete from Supabase
         const { error } = await db
             .from('messages')
             .delete()
-            .eq('id', messageId);
+            .eq('id', messageToDeleteId);
 
         if (error) {
             console.error("Error deleting message:", error.message);
-            alert("Could not delete message.");
+            // Close confirm modal
+            confirmDeleteModal.classList.remove('show');
+            // Show our custom error alert from the previous step!
+            showCustomAlert("Error", "Could not delete this message. Please try again.");
         } else {
-            console.log("Message deleted successfully from DB");
-            // Note: We don't remove the DIV here. 
-            // We let the Realtime Subscription (below) handle the UI update.
-            // This ensures it disappears for everyone at the exact same time.
+            console.log("Message deleted successfully");
+            // Success! Close the modal.
+            // (The Realtime Subscription will handle removing it from the screen)
+            confirmDeleteModal.classList.remove('show');
         }
 
     } catch (err) {
         console.error("Unexpected error:", err);
+        confirmDeleteModal.classList.remove('show');
+        showCustomAlert("Error", "An unexpected error occurred.");
+    } finally {
+        messageToDeleteId = null; // Reset
     }
 });
+
 // --- END: DELETE MESSAGE LOGIC ---
 
 // --- START: Chat Header Dropdown Logic ---
