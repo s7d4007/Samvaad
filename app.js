@@ -851,6 +851,43 @@ messagesArea.addEventListener('click', async (e) => {
 });
 // --- END: STAR MESSAGE LOGIC ---
 
+// --- START: DELETE MESSAGE LOGIC ---
+messagesArea.addEventListener('click', async (e) => {
+    // 1. Check if the Delete button was clicked
+    const deleteBtn = e.target.closest('.delete-btn');
+    if (!deleteBtn) return;
+
+    // 2. Get the Message ID
+    const messageDiv = deleteBtn.closest('.message');
+    const messageId = messageDiv.dataset.messageId;
+
+    if (!confirm("Are you sure you want to delete this message?")) {
+        return;
+    }
+
+    try {
+        // 3. Delete from Supabase
+        const { error } = await db
+            .from('messages')
+            .delete()
+            .eq('id', messageId);
+
+        if (error) {
+            console.error("Error deleting message:", error.message);
+            alert("Could not delete message.");
+        } else {
+            console.log("Message deleted successfully from DB");
+            // Note: We don't remove the DIV here. 
+            // We let the Realtime Subscription (below) handle the UI update.
+            // This ensures it disappears for everyone at the exact same time.
+        }
+
+    } catch (err) {
+        console.error("Unexpected error:", err);
+    }
+});
+// --- END: DELETE MESSAGE LOGIC ---
+
 // --- START: Chat Header Dropdown Logic ---
 
 async function exportChat() {
@@ -997,16 +1034,13 @@ function displayMessage(message) {
     messageDiv.classList.add('message', messageClass);
     messageDiv.dataset.messageId = message.id;
 
-    // --- START: Content Rendering Logic ---
+    // --- Content Logic ---
     let contentHTML;
-    
     if (message.message_type === 'image') {
-        // Render image in a wrapper with max-width limits
         contentHTML = `<a href="${message.content}" target="_blank" style="display: block;">
             <img src="${message.content}" alt="Image attachment" style="max-width: 250px; max-height: 200px; height: auto; border-radius: 8px;">
         </a>`;
     } else if (message.message_type === 'file') {
-        // Render general file as a link/icon
         const urlParts = message.content.split('/');
         const fileName = urlParts[urlParts.length - 1].split('_').pop(); 
         contentHTML = `
@@ -1016,12 +1050,10 @@ function displayMessage(message) {
             </div>
         `;
     } else {
-        // Standard text message
         contentHTML = `<p>${message.content}</p>`;
     }
-    // --- END: Content Rendering Logic ---
-    
-    // Check if the message is starred and create the star button HTML
+
+    // --- Star Button ---
     const starClass = message.is_starred ? 'fas fa-star' : 'far fa-star';
     const starButtonHtml = `
         <button class="star-btn ${message.is_starred ? 'is-starred' : ''}" title="Star message">
@@ -1029,10 +1061,24 @@ function displayMessage(message) {
         </button>
     `;
 
-    // Set the inner HTML. The star button placement depends on sent/received
+    // --- NEW: Delete Button (Only for Sender) ---
+    let deleteButtonHtml = '';
     if (isSent) {
-        messageDiv.innerHTML = `${starButtonHtml} ${contentHTML}`;
+        deleteButtonHtml = `
+            <button class="delete-btn" title="Delete message">
+                <i class="fas fa-trash"></i>
+            </button>
+        `;
+    }
+
+    // --- Assembly ---
+    // Note: We use row-reverse in CSS for sent messages, so the order here matters less visually,
+    // but typically we want: [Content] [Star] [Delete]
+    if (isSent) {
+        // For sent messages: Content is first, then buttons
+        messageDiv.innerHTML = `${contentHTML} ${starButtonHtml} ${deleteButtonHtml}`;
     } else {
+        // For received messages: Content first, then Star (No delete button)
         messageDiv.innerHTML = `${contentHTML} ${starButtonHtml}`;
     }
 
@@ -1183,43 +1229,62 @@ async function loadMessages(chatId) {
 }
 
 //Realtime Function
-
 function subscribeToChat(chatId) {
-    // 1. Unsubscribe from any old chat channel
+    // 1. Unsubscribe from old channels to prevent duplicates
     if (currentChatChannel) {
-        console.log(`Unsubscribing from old chat: ${currentChatChannel.topic}`);
         db.removeChannel(currentChatChannel);
         currentChatChannel = null;
     }
 
-    // 2. Create a new "channel" to listen to
-    // Listen for any INSERTS on the 'messages' table
-    // where the 'chat_id' matches our current chat.
+    // 2. Create the channel
     const channel = db.channel(`chat:${chatId}`);
 
-    currentChatChannel = channel.on(
-        'postgres_changes', // This is the event type
-        {
-            event: 'INSERT',
-            schema: 'public',
-            table: 'messages',
-            filter: `chat_id=eq.${chatId}`
-        },
-        (payload) => {
-            // 3. A new message has arrived!
-            console.log('New message received!', payload.new);
-
-            // 4. Use helper function to display it!
-            // Pass payload.new, which is the new message object
-            displayMessage(payload.new);
-        }
-    )
-        .subscribe((status) => {
-            if (status === 'SUBSCRIBED') {
-                console.log(`Successfully subscribed to chat: ${chatId}`);
-            } else {
-                console.log(`Failed to subscribe to chat: ${chatId}. Status: ${status}`);
+    currentChatChannel = channel
+        // --- LISTENER 1: NEW MESSAGES (Keep the Filter) ---
+        .on(
+            'postgres_changes',
+            {
+                event: 'INSERT',
+                schema: 'public',
+                table: 'messages',
+                filter: `chat_id=eq.${chatId}` // Filter is safe here!
+            },
+            (payload) => {
+                console.log('New message received!', payload.new);
+                displayMessage(payload.new);
             }
+        )
+        // --- LISTENER 2: DELETED MESSAGES (Remove the Filter) ---
+        .on(
+            'postgres_changes',
+            {
+                event: 'DELETE',
+                schema: 'public',
+                table: 'messages'
+                // REMOVED THE FILTER HERE
+            },
+            (payload) => {
+                // We receive the ID of the deleted row in payload.old
+                const messageId = payload.old.id;
+                
+                // We check if this message exists in our current DOM
+                const messageDiv = document.querySelector(`.message[data-message-id="${messageId}"]`);
+                
+                if (messageDiv) {
+                    console.log('Deleting message from screen:', messageId);
+                    // Add a fade-out effect
+                    messageDiv.style.transition = "opacity 0.3s ease";
+                    messageDiv.style.opacity = '0'; 
+                    
+                    // Remove it from the DOM after the animation
+                    setTimeout(() => messageDiv.remove(), 300); 
+                }
+                // If messageDiv is null, it means the deleted message belongs 
+                // to a different chat, so we just ignore it.
+            }
+        )
+        .subscribe((status) => {
+            console.log(`Subscription status for ${chatId}: ${status}`);
         });
 }
 // --- END OF REALTIME FUNCTION ---
