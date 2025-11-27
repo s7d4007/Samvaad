@@ -1575,3 +1575,43 @@ input:checked + .slider:before {
     /* Reverse the direction so the delete button sits to the left of the bubble */
     flex-direction: row-reverse; 
 }
+
+/* --- Header Status (Online/Typing) --- */
+
+.header-info {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    flex-grow: 1;
+    margin-left: 10px;
+}
+
+#chat-header-name {
+    line-height: 1.2;
+    font-size: 1.1rem;
+}
+
+#chat-header-status {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    font-weight: 500;
+    transition: color 0.3s ease;
+}
+
+/* Status: Online */
+#chat-header-status.status-online {
+    color: var(--primary-color); /* Blue */
+}
+
+/* Status: Typing */
+#chat-header-status.status-typing {
+    color: var(--primary-color); /* Blue */
+    font-style: italic;
+    animation: pulse-text 1.5s infinite;
+}
+
+@keyframes pulse-text {
+    0% { opacity: 0.6; }
+    50% { opacity: 1; }
+    100% { opacity: 0.6; }
+}

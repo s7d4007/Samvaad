@@ -5,7 +5,7 @@ const db = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 console.log('SupABASE is connected!', db);
 // --- START: THEME LOADER ---
 // This runs immediately when the script loads
-(function() {
+(function () {
     // Check localStorage for a saved theme
     const savedTheme = localStorage.getItem('theme');
     if (savedTheme === 'light') {
@@ -22,7 +22,7 @@ console.log('SupABASE is connected!', db);
 // --- END: THEME LOADER ---
 
 // --- START: WALLPAPER LOADER ---
-(function() {
+(function () {
     const savedWallpaper = localStorage.getItem('chat_wallpaper');
     // Can't access DOM elements like 'messagesArea' efficiently here 
     // because the DOM might not be ready, So handle the applying
@@ -37,6 +37,8 @@ let selectedChatId = null; // This will store the ID of the active chat
 let isSessionReady = false; // This flag will prevent the double-load
 let currentChatChannel = null; // This will hold our active chat subscription
 let emailForVerification = ''; // Stores the email during OTP check
+let typingTimeout = null; // To handle the typing timer
+let otherUserIsOnline = false; // To track if they are in the room
 
 // --- STEP 2: GET DOM ELEMENTS ---
 const authOverlay = document.getElementById('auth-overlay');
@@ -698,10 +700,10 @@ async function sendAttachment() {
 
     const file = fileInput.files[0];
     const fileExtension = file.name.split('.').pop().toLowerCase();
-    
+
     // Create a unique path (user_id/chat_id/timestamp_filename)
     const filePath = `${currentUserId}/${selectedChatId}/${Date.now()}_${file.name}`;
-    
+
     // Determine message type for display later
     let messageType = 'file';
     if (['png', 'jpg', 'jpeg', 'gif', 'webp'].includes(fileExtension)) {
@@ -711,7 +713,7 @@ async function sendAttachment() {
     try {
         // 1. Upload the file to Supabase Storage
         console.log(`Uploading file: ${filePath}`);
-        
+
         // This call requires the INSERT RLS policy we set up earlier
         const { data: uploadData, error: uploadError } = await db.storage
             .from('chat_media')
@@ -724,10 +726,10 @@ async function sendAttachment() {
             console.error("Storage Upload Error:", uploadError.message);
             return;
         }
-        
+
         // 2. Get the public URL for the file
         const fileUrl = `${SUPABASE_URL}/storage/v1/object/public/chat_media/${filePath}`;
-        
+
         // 3. Insert the message row with the file's URL
         const { error: insertError } = await db
             .from('messages')
@@ -745,7 +747,7 @@ async function sendAttachment() {
         }
 
         console.log(`Attachment sent successfully as type: ${messageType}`);
-        
+
     } catch (error) {
         console.error("General Upload Error:", error.message);
     } finally {
@@ -759,18 +761,18 @@ async function sendAttachment() {
 // --- START: SEND MESSAGE LOGIC ---
 messageForm.addEventListener('submit', async (e) => {
     e.preventDefault();
-    
+
     // Check if a file is attached (the new logic)
     if (fileInput.files && fileInput.files.length > 0) {
         // If a file is selected, upload it and return.
         await sendAttachment();
         return;
     }
-    
+
     // Standard Text Message Logic (Rest of the original function)
     const messageText = messageInput.value.trim();
     if (!messageText || !selectedChatId || !currentUserId) {
-        return; 
+        return;
     }
 
     try {
@@ -780,7 +782,7 @@ messageForm.addEventListener('submit', async (e) => {
                 chat_id: selectedChatId,
                 sender_id: currentUserId,
                 content: messageText,
-                message_type: 'text' 
+                message_type: 'text'
             });
 
         if (error) {
@@ -974,7 +976,7 @@ dropdownToggle.addEventListener('click', (e) => {
 
 exportChatBtn.addEventListener('click', (e) => {
     // Stop the click from closing the menu immediately
-    e.stopPropagation(); 
+    e.stopPropagation();
 
     // Call the helper function
     exportChat();
@@ -998,10 +1000,10 @@ function closeAttachmentMenu() {
 // Main toggle button for the "paperclip"
 attachmentBtn.addEventListener('click', (e) => {
     e.stopPropagation();
-    
+
     // Toggle the "toggled" class on the button for the animation
     const isToggled = attachmentBtn.classList.toggle('toggled');
-    
+
     // Toggle the "show" class on the menu
     if (isToggled) {
         attachmentMenu.classList.add('show');
@@ -1045,12 +1047,12 @@ window.addEventListener('click', () => {
 
 // This function just creates the HTML for a single message
 function displayMessage(message) {
-    if (!messagesArea) return; 
-    
+    if (!messagesArea) return;
+
     const shouldScroll = messagesArea.scrollTop + messagesArea.clientHeight >= messagesArea.scrollHeight - 10;
     const placeholder = messagesArea.querySelector('.chat-list-empty');
     if (placeholder) {
-        placeholder.remove(); 
+        placeholder.remove();
     }
 
     const isSent = message.sender_id === currentUserId;
@@ -1068,7 +1070,7 @@ function displayMessage(message) {
         </a>`;
     } else if (message.message_type === 'file') {
         const urlParts = message.content.split('/');
-        const fileName = urlParts[urlParts.length - 1].split('_').pop(); 
+        const fileName = urlParts[urlParts.length - 1].split('_').pop();
         contentHTML = `
             <div style="display: flex; align-items: center; gap: 0.5rem; padding: 0.75rem 1rem;">
                 <i class="fas fa-file-alt" style="font-size: 1.2rem;"></i>
@@ -1255,64 +1257,148 @@ async function loadMessages(chatId) {
 }
 
 //Realtime Function
+// --- START: REALTIME & PRESENCE LOGIC ---
+const chatHeaderStatus = document.getElementById('chat-header-status');
+
 function subscribeToChat(chatId) {
-    // 1. Unsubscribe from old channels to prevent duplicates
+    // 1. Unsubscribe from old channels
     if (currentChatChannel) {
         db.removeChannel(currentChatChannel);
         currentChatChannel = null;
     }
 
+    // Reset UI Status immediately
+    updateStatusUI('Offline');
+    otherUserIsOnline = false;
+
     // 2. Create the channel
-    const channel = db.channel(`chat:${chatId}`);
+    const channel = db.channel(`chat:${chatId}`, {
+        config: {
+            presence: {
+                key: currentUserId, // Identify myself by my ID
+            },
+        },
+    });
 
     currentChatChannel = channel
-        // --- LISTENER 1: NEW MESSAGES (Keep the Filter) ---
-        .on(
-            'postgres_changes',
-            {
-                event: 'INSERT',
-                schema: 'public',
-                table: 'messages',
-                filter: `chat_id=eq.${chatId}` // Filter is safe here!
-            },
+        // --- DATABASE LISTENERS (Messages) ---
+        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages', filter: `chat_id=eq.${chatId}` },
             (payload) => {
-                console.log('New message received!', payload.new);
                 displayMessage(payload.new);
+                // If they sent a message, they are definitely done typing!
+                updateStatusUI(otherUserIsOnline ? 'Online' : 'Offline');
             }
         )
-        // --- LISTENER 2: DELETED MESSAGES (Remove the Filter) ---
-        .on(
-            'postgres_changes',
-            {
-                event: 'DELETE',
-                schema: 'public',
-                table: 'messages'
-                // REMOVED THE FILTER HERE
-            },
+        .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'messages' },
             (payload) => {
-                // We receive the ID of the deleted row in payload.old
                 const messageId = payload.old.id;
-                
-                // We check if this message exists in our current DOM
                 const messageDiv = document.querySelector(`.message[data-message-id="${messageId}"]`);
-                
                 if (messageDiv) {
-                    console.log('Deleting message from screen:', messageId);
-                    // Add a fade-out effect
-                    messageDiv.style.transition = "opacity 0.3s ease";
-                    messageDiv.style.opacity = '0'; 
-                    
-                    // Remove it from the DOM after the animation
-                    setTimeout(() => messageDiv.remove(), 300); 
+                    messageDiv.style.opacity = '0';
+                    setTimeout(() => messageDiv.remove(), 300);
                 }
-                // If messageDiv is null, it means the deleted message belongs 
-                // to a different chat, so we just ignore it.
             }
         )
-        .subscribe((status) => {
-            console.log(`Subscription status for ${chatId}: ${status}`);
+        // --- PRESENCE LISTENER (Online Status) ---
+        .on('presence', { event: 'sync' }, () => {
+            const newState = channel.presenceState();
+
+            // Check if ANYONE else is in the room besides me
+            // The keys in 'newState' are User IDs
+            const usersInRoom = Object.keys(newState);
+
+            // Filter out my own ID
+            const otherUsers = usersInRoom.filter(id => id !== currentUserId);
+
+            if (otherUsers.length > 0) {
+                otherUserIsOnline = true;
+                updateStatusUI('Online');
+            } else {
+                otherUserIsOnline = false;
+                updateStatusUI('Offline');
+            }
+        })
+        // --- BROADCAST LISTENER (Typing Indicator) ---
+        .on('broadcast', { event: 'typing' }, (event) => {
+            // Log it so we can see it working
+            console.log("RECEIVED BROADCAST:", event);
+            // The data is wrapped inside 'event.payload'
+            const data = event.payload;
+            // Check if the signal is from the OTHER person
+            if (data.user_id !== currentUserId) {
+                if (data.is_typing) {
+                    updateStatusUI('Typing...');
+                } else {
+                    // Revert to 'Online' if they stop typing
+                    updateStatusUI('Online');
+                }
+            }
+        })
+        .subscribe(async (status) => {
+            if (status === 'SUBSCRIBED') {
+                // I am in the room! Announce my presence.
+                await channel.track({
+                    online_at: new Date().toISOString(),
+                    user_id: currentUserId
+                });
+            }
         });
 }
+
+// Helper to update the text and color
+function updateStatusUI(status) {
+    chatHeaderStatus.textContent = status;
+    chatHeaderStatus.className = ''; // Reset classes
+
+    if (status === 'Online') {
+        chatHeaderStatus.classList.add('status-online');
+    } else if (status === 'Typing...') {
+        chatHeaderStatus.classList.add('status-typing');
+    }
+}
+
+// --- INPUT EVENT LISTENER (Send "I am typing" signal) ---
+let isTypingSignalSent = false; // Flag to prevent spamming
+
+messageInput.addEventListener('input', async () => {
+    if (!currentChatChannel || !currentUserId) return;
+
+    // 1. Only send "True" if we haven't sent it recently
+    if (!isTypingSignalSent) {
+        isTypingSignalSent = true;
+
+        const response = await currentChatChannel.send({
+            type: 'broadcast',
+            event: 'typing',
+            payload: { user_id: currentUserId, is_typing: true }
+        });
+
+        if (response !== 'ok') {
+            console.error("Broadcast failed:", response);
+        } else {
+            console.log("Sent 'Typing...' signal");
+        }
+    }
+
+    // 2. Clear the old "Stop" timer if it exists
+    if (typingTimeout) clearTimeout(typingTimeout);
+
+    // 3. Set a new timer to send "Stop" after 2 seconds of silence
+    typingTimeout = setTimeout(async () => {
+        await currentChatChannel.send({
+            type: 'broadcast',
+            event: 'typing',
+            payload: { user_id: currentUserId, is_typing: false }
+        });
+
+        console.log("Sent 'Stopped typing' signal");
+
+        // Reset the flag so we can send "True" again next time
+        isTypingSignalSent = false;
+    }, 2000);
+});
+// --- END: REALTIME & PRESENCE LOGIC ---
+// --- END: REALTIME & PRESENCE LOGIC ---
 // --- END OF REALTIME FUNCTION ---
 // --- END: NEW CHAT LIST LOGIC ---
 
@@ -1346,7 +1432,7 @@ function loadSavedWallpaper() {
         const savedWallpaper = localStorage.getItem('chat_wallpaper');
         if (savedWallpaper) {
             messagesArea.style.backgroundImage = `url(${savedWallpaper})`;
-            removeWallpaperBtn.style.display = 'inline-flex'; 
+            removeWallpaperBtn.style.display = 'inline-flex';
         }
     } catch (e) {
         console.error("Error loading wallpaper:", e);
@@ -1357,7 +1443,7 @@ loadSavedWallpaper();
 
 // 2. Handle "Change" Button Click
 changeWallpaperBtn.addEventListener('click', () => {
-    wallpaperInput.click(); 
+    wallpaperInput.click();
 });
 
 // 3. Handle File Selection
@@ -1366,30 +1452,30 @@ wallpaperInput.addEventListener('change', (e) => {
         const file = e.target.files[0];
 
         // LIMIT CHECK: 3MB (3 * 1024 * 1024 bytes)
-        const limit = 3 * 1024 * 1024; 
+        const limit = 3 * 1024 * 1024;
 
         if (file.size > limit) {
             // Show our FANCY modal instead of alert()
             showCustomAlert("File Too Large", "Please choose an image smaller than 3MB. High-resolution images are too heavy for this app!");
             // Reset input so they can try again
-            wallpaperInput.value = ''; 
+            wallpaperInput.value = '';
             return;
         }
 
         const reader = new FileReader();
 
-        reader.onload = function(event) {
+        reader.onload = function (event) {
             const base64String = event.target.result;
 
             try {
                 // Attempt to save to Local Storage
                 localStorage.setItem('chat_wallpaper', base64String);
-                
+
                 // Apply immediately
                 messagesArea.style.backgroundImage = `url(${base64String})`;
                 removeWallpaperBtn.style.display = 'inline-flex';
                 console.log("Wallpaper updated successfully!");
-                
+
             } catch (error) {
                 // This catches the "QuotaExceededError" if LocalStorage is full
                 console.error("Storage failed:", error);
