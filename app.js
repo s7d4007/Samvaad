@@ -1522,18 +1522,50 @@ db.auth.onAuthStateChange(async (event, session) => {
         fullPageLoader.classList.add('hidden'); // Hide the loader
         isSessionReady = true; // Mark the session as ready
     } else {
-        // User is LOGGED OUT
+        // --- USER IS LOGGED OUT ---
         console.log('Auth state changed: User is OUT');
+
+        // 1. Show Auth Screens
         authOverlay.classList.remove('hidden');
         document.body.classList.add('auth-visible');
-        fullPageLoader.classList.add('hidden'); // Hide the loader
         chatApp.classList.add('hidden');
+        fullPageLoader.classList.add('hidden');
 
-        currentUserId = null;
-        newChatBtn.disabled = true; // Disable the button if logged out
+        // 2. DISABLE CONTROLS
+        newChatBtn.disabled = true;
         messageInput.disabled = true;
         messageSendBtn.disabled = true;
-        // --- RESET THE FLAG ---
-        isSessionReady = false; // Reset the flag for the next login
+
+        // 3. WIPE SENSITIVE DATA (Crucial Fix)
+
+        // Clear Global Variables
+        currentUserId = null;
+        selectedChatId = null;
+        isSessionReady = false;
+
+        // Stop Realtime Listeners
+        if (currentChatChannel) {
+            db.removeChannel(currentChatChannel);
+            currentChatChannel = null;
+        }
+
+        // Wipe HTML Content (So the next user sees nothing)
+        contactsList.innerHTML = '';
+        messagesArea.innerHTML = '';
+
+        // Reset Header Info
+        chatHeaderName.textContent = '...';
+        chatHeaderAvatar.innerHTML = '';
+        if (typeof updateStatusUI === "function") updateStatusUI('Offline'); // Reset status text
+
+        // Reset View to "Placeholder" state
+        chatWindow.classList.remove('active');
+        chatPlaceholder.style.display = 'flex'; // Show "Select a chat"
+
+        // Clear any "Active" class from the sidebar
+        const activeContact = document.querySelector('.contact-item.selected');
+        if (activeContact) activeContact.classList.remove('selected');
+
+        console.log("Session data wiped successfully.");
     }
 });
