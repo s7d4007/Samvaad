@@ -1408,78 +1408,83 @@ const wallpaperInput = document.getElementById('wallpaper-input');
 const changeWallpaperBtn = document.getElementById('change-wallpaper-btn');
 const removeWallpaperBtn = document.getElementById('remove-wallpaper-btn');
 
-// Custom Alert Elements
+// Custom Alert Elements (Reuse these)
 const customAlertModal = document.getElementById('custom-alert-modal');
 const alertTitle = document.getElementById('alert-title');
 const alertMessage = document.getElementById('alert-message');
 const closeAlertBtn = document.getElementById('close-alert-btn');
 
-// Helper: Show Custom Alert
 function showCustomAlert(title, message) {
     alertTitle.textContent = title;
     alertMessage.textContent = message;
     customAlertModal.classList.add('show');
 }
-
-// Helper: Close Custom Alert
 closeAlertBtn.addEventListener('click', () => {
     customAlertModal.classList.remove('show');
 });
 
-// 1. Load Wallpaper on Startup
-function loadSavedWallpaper() {
+// 1. Load Wallpaper (NOW ACCEPTS USER ID)
+function loadSavedWallpaper(userId) {
+    if (!userId) return; // Safety check
+
     try {
-        const savedWallpaper = localStorage.getItem('chat_wallpaper');
+        // We look for a key specific to THIS user
+        const key = `chat_wallpaper_${userId}`; 
+        const savedWallpaper = localStorage.getItem(key);
+        
         if (savedWallpaper) {
             messagesArea.style.backgroundImage = `url(${savedWallpaper})`;
-            removeWallpaperBtn.style.display = 'inline-flex';
+            removeWallpaperBtn.style.display = 'inline-flex'; 
+        } else {
+            // If they don't have one, make sure we clear any old one from the screen
+            messagesArea.style.backgroundImage = 'none';
+            removeWallpaperBtn.style.display = 'none';
         }
     } catch (e) {
         console.error("Error loading wallpaper:", e);
     }
 }
 
-loadSavedWallpaper();
+// Note: We REMOVED the global loadSavedWallpaper() call from here.
+// We will call it inside the Auth listener instead!
 
 // 2. Handle "Change" Button Click
 changeWallpaperBtn.addEventListener('click', () => {
-    wallpaperInput.click();
+    wallpaperInput.click(); 
 });
 
 // 3. Handle File Selection
 wallpaperInput.addEventListener('change', (e) => {
+    // Safety check: User must be logged in
+    if (!currentUserId) return;
+
     if (e.target.files && e.target.files[0]) {
         const file = e.target.files[0];
-
-        // LIMIT CHECK: 3MB (3 * 1024 * 1024 bytes)
-        const limit = 3 * 1024 * 1024;
+        const limit = 3 * 1024 * 1024; // 3MB
 
         if (file.size > limit) {
-            // Show our FANCY modal instead of alert()
-            showCustomAlert("File Too Large", "Please choose an image smaller than 3MB. High-resolution images are too heavy for this app!");
-            // Reset input so they can try again
-            wallpaperInput.value = '';
+            showCustomAlert("File Too Large", "Please choose an image smaller than 3MB.");
+            wallpaperInput.value = ''; 
             return;
         }
 
         const reader = new FileReader();
 
-        reader.onload = function (event) {
+        reader.onload = function(event) {
             const base64String = event.target.result;
 
             try {
-                // Attempt to save to Local Storage
-                localStorage.setItem('chat_wallpaper', base64String);
-
-                // Apply immediately
+                // SAVE WITH UNIQUE USER KEY
+                const key = `chat_wallpaper_${currentUserId}`;
+                localStorage.setItem(key, base64String);
+                
                 messagesArea.style.backgroundImage = `url(${base64String})`;
                 removeWallpaperBtn.style.display = 'inline-flex';
-                console.log("Wallpaper updated successfully!");
-
+                console.log("Wallpaper updated for user:", currentUserId);
+                
             } catch (error) {
-                // This catches the "QuotaExceededError" if LocalStorage is full
                 console.error("Storage failed:", error);
-                showCustomAlert("Storage Full", "Your browser's local storage is full. Try a smaller image or lower resolution.");
+                showCustomAlert("Storage Full", "Local storage is full. Try a smaller image.");
             }
         };
 
@@ -1489,7 +1494,12 @@ wallpaperInput.addEventListener('change', (e) => {
 
 // 4. Handle "Remove" Button Click
 removeWallpaperBtn.addEventListener('click', () => {
-    localStorage.removeItem('chat_wallpaper');
+    if (!currentUserId) return;
+
+    // Remove ONLY this user's wallpaper
+    const key = `chat_wallpaper_${currentUserId}`;
+    localStorage.removeItem(key);
+    
     messagesArea.style.backgroundImage = 'none';
     removeWallpaperBtn.style.display = 'none';
     wallpaperInput.value = '';
@@ -1501,71 +1511,69 @@ removeWallpaperBtn.addEventListener('click', () => {
 db.auth.onAuthStateChange(async (event, session) => {
 
     if (session) {
-        // --- THIS IS THE NEW CHECK ---
-        // If the session is already set up, don't run all this code again
-        if (isSessionReady) {
-            return;
-        }
-        // --- END OF NEW CHECK ---
+        if (isSessionReady) { return; }
 
-        // User is LOGGED IN for the first time
+        // --- LOGIN SUCCESS ---
         console.log('Auth state changed: User is IN', session.user.email);
+        
+        // ... (Your existing UI setup lines) ...
         authOverlay.classList.add('hidden');
         document.body.classList.remove('auth-visible');
         chatApp.classList.remove('hidden');
         userEmailDisplay.textContent = session.user.email;
         currentUserId = session.user.id;
-        newChatBtn.disabled = false; // Enable the "New Chat" button
+        
+        newChatBtn.disabled = false;
         messageInput.disabled = false;
         messageSendBtn.disabled = false;
+        fullPageLoader.classList.add('hidden');
+
+        // --- NEW: Load THIS User's Wallpaper ---
+        loadSavedWallpaper(currentUserId); 
+
         loadUserChats();
-        fullPageLoader.classList.add('hidden'); // Hide the loader
-        isSessionReady = true; // Mark the session as ready
+        isSessionReady = true; 
+
     } else {
-        // --- USER IS LOGGED OUT ---
+        // --- LOGOUT / CLEANUP ---
         console.log('Auth state changed: User is OUT');
 
-        // 1. Show Auth Screens
+        // ... (Your existing UI hiding lines) ...
         authOverlay.classList.remove('hidden');
         document.body.classList.add('auth-visible');
         chatApp.classList.add('hidden');
-        fullPageLoader.classList.add('hidden');
+        fullPageLoader.classList.add('hidden'); 
 
-        // 2. DISABLE CONTROLS
         newChatBtn.disabled = true;
         messageInput.disabled = true;
         messageSendBtn.disabled = true;
 
-        // 3. WIPE SENSITIVE DATA (Crucial Fix)
-
-        // Clear Global Variables
+        // Wipe Data
         currentUserId = null;
         selectedChatId = null;
-        isSessionReady = false;
+        isSessionReady = false; 
 
-        // Stop Realtime Listeners
         if (currentChatChannel) {
             db.removeChannel(currentChatChannel);
             currentChatChannel = null;
         }
 
-        // Wipe HTML Content (So the next user sees nothing)
-        contactsList.innerHTML = '';
+        contactsList.innerHTML = ''; 
         messagesArea.innerHTML = '';
 
-        // Reset Header Info
+        // --- NEW: Wipe the Wallpaper Visuals ---
+        messagesArea.style.backgroundImage = 'none'; // <--- Added this line!
+        
         chatHeaderName.textContent = '...';
         chatHeaderAvatar.innerHTML = '';
-        if (typeof updateStatusUI === "function") updateStatusUI('Offline'); // Reset status text
+        if(typeof updateStatusUI === "function") updateStatusUI('Offline');
 
-        // Reset View to "Placeholder" state
         chatWindow.classList.remove('active');
-        chatPlaceholder.style.display = 'flex'; // Show "Select a chat"
-
-        // Clear any "Active" class from the sidebar
+        chatPlaceholder.style.display = 'flex';
+        
         const activeContact = document.querySelector('.contact-item.selected');
         if (activeContact) activeContact.classList.remove('selected');
-
+        
         console.log("Session data wiped successfully.");
     }
 });
