@@ -1641,3 +1641,108 @@ input:checked + .slider:before {
     margin-top: auto; /* Pushes it to the bottom if using flex column */
     margin-bottom: 10px;
 }
+
+/* =========================================
+   BUG REPORT MODAL STYLING
+   ========================================= */
+
+/* 1. Fix the Spacing and Layout */
+#bug-report-modal .modal-content {
+    display: flex;
+    flex-direction: column;
+    gap: 15px; /* Adds breathing room between title, text, and buttons */
+    padding: 30px; /* More internal spacing */
+    max-width: 500px; /* Slightly wider */
+}
+
+/* 2. Style the Title and Subtitle */
+#bug-report-modal h3 {
+    margin: 0;
+    font-size: 1.5rem;
+    color: var(--text-light);
+}
+
+#bug-report-modal .modal-subtitle {
+    margin: 0;
+    color: var(--text-muted);
+    font-size: 0.95rem;
+    line-height: 1.4;
+}
+
+/* 3. Style the Text Area (The input box) */
+#bug-description {
+    width: 100%;
+    background-color: var(--bg-dark); /* Darker than the modal background */
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 15px;
+    color: var(--text-light);
+    font-size: 1rem;
+    font-family: inherit;
+    resize: vertical;     /* User can only resize height, not width */
+    min-height: 120px;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+#bug-description:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px rgba(var(--primary-color-rgb), 0.2);
+}
+
+#bug-description::placeholder {
+    color: var(--text-muted);
+    opacity: 0.7;
+}
+
+/* 4. Fix the Buttons */
+#bug-report-modal .modal-actions {
+    margin-top: 10px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+}
+
+/* Common button styles for this modal */
+#cancel-bug-btn, 
+#submit-bug-btn {
+    padding: 10px 24px;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+/* Specific Cancel Button Style */
+#cancel-bug-btn {
+    background: transparent;
+    border: 1px solid var(--border-color);
+    color: var(--text-muted);
+}
+
+#cancel-bug-btn:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+    color: var(--text-light);
+    border-color: var(--text-light);
+}
+
+/* Specific Submit Button Style */
+#submit-bug-btn {
+    background-color: var(--primary-color);
+    border: 1px solid var(--primary-color);
+    color: white;
+}
+
+#submit-bug-btn:hover {
+    background-color: var(--primary-color-dark);
+    box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3); /* Glow effect */
+}
+
+#submit-bug-btn:disabled {
+    background-color: var(--bg-light-hover);
+    border-color: var(--bg-light-hover);
+    color: var(--text-muted);
+    cursor: not-allowed;
+    box-shadow: none;
+}
