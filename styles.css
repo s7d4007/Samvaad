@@ -1615,3 +1615,29 @@ input:checked + .slider:before {
     50% { opacity: 1; }
     100% { opacity: 0.6; }
 }
+
+/* Bug Report Modal Specifics */
+#bug-description {
+    width: 100%;
+    padding: 12px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    color: var(--text-primary);
+    font-size: 0.95rem;
+    resize: vertical; /* Allow resizing height only */
+    margin-bottom: 20px;
+    font-family: inherit;
+}
+
+#bug-description:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    background: rgba(255, 255, 255, 0.1);
+}
+
+/* Ensure the bug button has some spacing if needed */
+#report-bug-btn {
+    margin-top: auto; /* Pushes it to the bottom if using flex column */
+    margin-bottom: 10px;
+}

@@ -134,6 +134,13 @@ const uploadFileBtn = document.getElementById('upload-file-btn');
 const fileInput = document.getElementById('file-input');
 const filePreviewName = document.getElementById('file-preview-name');
 
+//Bug Report
+const reportBugBtn = document.getElementById('report-bug-btn');
+const bugReportModal = document.getElementById('bug-report-modal');
+const bugInput = document.getElementById('bug-description');
+const submitBugBtn = document.getElementById('submit-bug-btn');
+const cancelBugBtn = document.getElementById('cancel-bug-btn');
+
 // --- STEP 3: HANDLE AUTH LOGIC ---
 
 // --- START:  Sliding Panel Toggle Logic ---
@@ -1506,6 +1513,85 @@ removeWallpaperBtn.addEventListener('click', () => {
 });
 
 // --- END: WALLPAPER LOGIC ---
+// --- BUG REPORT LOGIC (FIXED) ---
+
+// 1. Open Modal
+if (reportBugBtn) {
+    reportBugBtn.addEventListener('click', (e) => {
+        e.preventDefault(); 
+        console.log("Bug Button Clicked!"); 
+
+        if (bugReportModal) {
+            // FIX: We must ADD 'show' to trigger the CSS animation
+            bugReportModal.classList.remove('hidden'); 
+            bugReportModal.classList.add('show'); 
+            bugInput.focus();
+        } else {
+            console.error("Error: bugReportModal element not found.");
+        }
+    });
+}
+
+// 2. Close Modal (Cancel)
+if (cancelBugBtn) {
+    cancelBugBtn.addEventListener('click', () => {
+        bugReportModal.classList.remove('show');
+        // Optional: wait for animation to finish before adding hidden, 
+        // but for now simple removal works:
+        setTimeout(() => {
+             bugReportModal.classList.add('hidden');
+        }, 300); // Matches CSS transition time
+    });
+}
+
+// 3. Submit Report
+if (submitBugBtn) {
+    submitBugBtn.addEventListener('click', async () => {
+        const description = bugInput.value.trim();
+
+        if (!description) {
+            showCustomAlert("Missing Info", "Please describe the bug.");
+            return;
+        }
+
+        submitBugBtn.textContent = "Sending...";
+        submitBugBtn.disabled = true;
+
+        try {
+            // FIX: Use 'db' instead of 'supabase'
+            const { error } = await db
+                .from('bug_reports')
+                .insert([{ user_id: currentUserId, description: description }]);
+
+            if (error) throw error;
+
+            showCustomAlert("Thank You!", "Report Sent Successfully!");
+            
+            // Close Modal
+            bugReportModal.classList.remove('show');
+            setTimeout(() => bugReportModal.classList.add('hidden'), 300);
+            
+            bugInput.value = ''; // Clear text
+
+        } catch (err) {
+            console.error("Error submitting bug:", err);
+            showCustomAlert("Error", "Failed to send report.");
+        } finally {
+            submitBugBtn.textContent = "Submit Report";
+            submitBugBtn.disabled = false;
+        }
+    });
+}
+
+// 4. Click Outside to Close
+if (bugReportModal) {
+    bugReportModal.addEventListener('click', (e) => {
+        if (e.target === bugReportModal) {
+            bugReportModal.classList.remove('show');
+            setTimeout(() => bugReportModal.classList.add('hidden'), 300);
+        }
+    });
+}
 
 // --- STEP 4: MANAGE SESSION ---
 db.auth.onAuthStateChange(async (event, session) => {

@@ -115,6 +115,10 @@
                     </button>
                 </li>
                 <li>
+                    <button id="report-bug-btn" class="icon-btn" title="Report a Bug" style="margin-top: auto;">
+                        <i class="fa-solid fa-bug"></i>
+                    </button>
+                <li>
                     <button title="Sign Out" id="sign-out-btn">
                         <i class="fas fa-sign-out-alt"></i>
                         <span class="nav-text">Logout</span>
@@ -428,6 +432,20 @@
                 <button type="button" id="confirm-delete-btn" class="modal-btn primary-danger">
                     Delete It
                 </button>
+            </div>
+        </div>
+    </div>
+    <div id="bug-report-modal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <h3>Report a Bug</h3>
+            <p class="modal-subtitle">Describe the issue you found. We appreciate your help!</p>
+
+            <textarea id="bug-description" placeholder="e.g., When I change wallpaper, the button freezes..."
+                rows="5"></textarea>
+
+            <div class="modal-actions">
+                <button id="cancel-bug-btn" class="btn-secondary">Cancel</button>
+                <button id="submit-bug-btn" class="btn-primary">Submit Report</button>
             </div>
         </div>
     </div>
